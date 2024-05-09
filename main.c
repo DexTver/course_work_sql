@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 typedef struct Athlete {
     char *name;
     char *university;
@@ -24,6 +25,9 @@ typedef struct ListOfAthlete {
     NodeOfList *first;
     NodeOfList *last;
 } ListOfAthlete;
+
+ListOfAthlete *list;
+int g_id;
 
 int from_str_to_int(char *x) {
     int ans = 0;
@@ -99,6 +103,7 @@ ListOfAthlete *make_list() {
     if (ph != NULL) {
         ph->length = 0;
         ph->first = NULL;
+        ph->last = NULL;
     }
     return ph;
 }
@@ -113,6 +118,8 @@ NodeOfList *create_node(const char *text) {
         strcpy(copytext, text);
         new_node->data = fill_struct(copytext);
         new_node->next = NULL;
+        new_node->prev = NULL;
+        new_node->id = g_id++;
     }
     return new_node;
 }
@@ -145,11 +152,9 @@ void save() {
 
 }
 
-ListOfAthlete *list;
-int g_id;
-
 int main() {
-    char filename[128], str[128];
+    char filename[128], str[128], text[1024];
+    NodeOfList *cur_node = NULL, *prev_node = NULL;
     FILE *f;
 
     printf("Please enter the file name:\n");
@@ -165,6 +170,19 @@ int main() {
 
     g_id = 1;
     list = make_list();
+    while (fgets(text, sizeof(text), f)) {
+        cur_node = create_node(text);
+        cur_node->prev = prev_node;
+        if (list->length == 0) {
+            list->first = cur_node;
+        } else {
+            prev_node->next = cur_node;
+        }
+        prev_node = cur_node;
+        ++list->length;
+    }
+    printf("The file has successfully been processed!\n");
+    fclose(f);
 
 
     do {
