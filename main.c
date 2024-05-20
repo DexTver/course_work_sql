@@ -32,6 +32,7 @@ typedef struct ListOfAthlete {
     NodeOfList *last;
 } ListOfAthlete;
 
+/* struct fill */
 int from_str_to_int(char *x) {
     int ans = 0;
 
@@ -100,6 +101,7 @@ Athlete *fill_struct(char *str) {
     return user;
 }
 
+/* constructor */
 ListOfAthlete *make_list() {
     ListOfAthlete *ph = NULL;
     ph = (ListOfAthlete *) malloc(sizeof(ListOfAthlete));
@@ -127,6 +129,7 @@ NodeOfList *create_node(const char *text, int g_id) {
     return new_node;
 }
 
+/* help */
 void help() {
     printf("To display the data, enter the command \"!print\"\n"
            "To find athletes, enter the command \"!find\"\n"
@@ -138,11 +141,22 @@ void help() {
            "To end the program, enter the command \"!end\"\n");
 }
 
+void wait() {
+    printf("\nTo continue press \"Enter\"...");
+    getchar();
+}
+
+/* print */
 void print_line() {
     printf("+");
     for (int i = 0; i < 22; printf("-"), ++i);
     printf("+------------+-----+--------+--------"
            "+------+------+------+-------+\n");
+}
+
+void print_head() {
+    printf("| Name                 | University | Age | Weight | Height "
+           "| Res1 | Res2 | Res3 | Index |\n");
 }
 
 void print_node(const Athlete *node) {
@@ -156,10 +170,8 @@ void print_node(const Athlete *node) {
 
 void print(const ListOfAthlete *list) {
     NodeOfList *cur_node = list->first;
-
     print_line();
-    printf("| Name                 | University | Age | Weight | Height "
-           "| Res1 | Res2 | Res3 | Index |\n");
+    print_head();
     print_line();
     while (cur_node != NULL) {
         print_node(cur_node->data);
@@ -168,10 +180,121 @@ void print(const ListOfAthlete *list) {
     print_line();
 }
 
-void find(ListOfAthlete *list) {
+/* find */
+char *m_strlwr(const char *str) {
+    char *new_str = NULL;
+    new_str = (char *) malloc((strlen(str) + 1) * sizeof(char));
 
+    if (new_str != NULL) {
+        strcpy(new_str, str);
+        strlwr(new_str);
+    }
+    return new_str;
 }
 
+void sorted(int *mas, const ListOfAthlete *list, int param) {
+    NodeOfList *cur_node, *min_node;
+    int ind;
+
+    for (int j = 0; j < list->length; ++j) {
+        cur_node = list->first;
+        min_node = NULL;
+        for (int i = 0; cur_node != NULL && i < list->length; ++i, cur_node = cur_node->next) {
+            if (mas[i] == 1) {
+                if ((min_node == NULL) ||
+                    ((param == 1 && min_node->data->age > cur_node->data->age) ||
+                     (param == 2 && min_node->data->weight > cur_node->data->weight) ||
+                     (param == 3 && min_node->data->height > cur_node->data->height) ||
+                     (param == 4 && min_node->data->index > cur_node->data->index))) {
+                    min_node = cur_node;
+                    ind = i;
+                }
+            }
+        }
+        if (min_node != NULL) {
+            mas[ind] = 2;
+            print_node(min_node->data);
+        }
+    }
+
+    for (int j = 0; j < list->length; ++j) {
+        if (mas[j] == 2) mas[j] = 1;
+    }
+}
+
+void find(ListOfAthlete *list) {
+    NodeOfList *cur_node = list->first;
+    char x[128], *str, *new_str;
+    int mas[list->length], fl, param;
+
+    do {
+        printf("Select a field to find by:\n"
+               "1 = name\n"
+               "2 = university\n"
+               "0 = exit\n"
+               "Enter only one number!\n");
+        scanf("%i", &param);
+        if (param < 1 || 2 < param) {
+            printf("Invalid command!\n");
+        }
+    } while (param < 0 || 2 < param);
+    if (param != 0) {
+        printf("Enter the search string:\n");
+        getchar();
+        fgets(x, sizeof(x), stdin);
+        x[strlen(x) - 1] = '\0';
+        CLS;
+        printf("%s\n", x);
+        strlwr(x);
+        fl = 0;
+        for (int i = 0; cur_node != NULL && i < list->length; ++i) {
+            if (param == 1) str = cur_node->data->name;
+            else str = cur_node->data->university;
+            new_str = m_strlwr(str);
+            if (strstr(new_str, x) != NULL) {
+                if (fl == 0) {
+                    print_line();
+                    print_head();
+                    print_line();
+                }
+                print_node(cur_node->data);
+                fl = 1;
+                mas[i] = 1;
+            } else {
+                mas[i] = 0;
+            }
+            free(new_str);
+            cur_node = cur_node->next;
+        }
+        if (fl == 0) {
+            printf("No matches found!\n");
+            wait();
+        } else {
+            print_line();
+            do {
+                printf("Select a field to sort by or exit:\n"
+                       "1 = age\n"
+                       "2 = weight\n"
+                       "3 = height\n"
+                       "4 = index\n"
+                       "0 = exit\n"
+                       "Enter only one number!\n");
+                scanf("%i", &param);
+                if (param < 0 || 4 < param) {
+                    printf("Invalid command!\n");
+                } else if (param != 0) {
+                    print_line();
+                    print_head();
+                    print_line();
+                    sorted(mas, list, param);
+                    print_line();
+                }
+            } while (param != 0);
+        }
+    }
+}
+
+/* sort */
 NodeOfList **get_mas(const ListOfAthlete *list) {
     NodeOfList *cur_node = list->first;
     NodeOfList **mas = NULL;
@@ -205,9 +328,9 @@ void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
 
 void sort(ListOfAthlete *list) {
     NodeOfList **mas = get_mas(list);
-    int n = list->length, param = -1;
-    while (param != 0) {
-        printf("Select a field to sort by:\n"
+    int n = list->length, param;
+    do {
+        printf("Select a field to sort by or exit:\n"
                "1 = age\n"
                "2 = weight\n"
                "3 = height\n"
@@ -230,7 +353,7 @@ void sort(ListOfAthlete *list) {
             }
             print(list);
         }
-    }
+    } while (param != 0);
     free(mas);
 }
 
@@ -248,12 +371,6 @@ void delete(ListOfAthlete *list) {
 
 void save(ListOfAthlete *list) {
 
-}
-
-void wait() {
-    printf("\nTo continue press \"Enter\"...");
-    getchar();
-    getchar();
 }
 
 int main() {
@@ -301,11 +418,14 @@ int main() {
         if (!strcmp(str, "!print")) {
             CLS;
             print(list);
+            getchar();
             wait();
+            CLS;
         } else if (!strcmp(str, "!find")) {
             CLS;
             print(list);
             find(list);
+            CLS;
         } else if (!strcmp(str, "!sort")) {
             CLS;
             print(list);
