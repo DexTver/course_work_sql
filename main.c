@@ -26,9 +26,6 @@ typedef struct ListOfAthlete {
     NodeOfList *last;
 } ListOfAthlete;
 
-ListOfAthlete *list;
-int g_id;
-
 int from_str_to_int(char *x) {
     int ans = 0;
 
@@ -108,7 +105,7 @@ ListOfAthlete *make_list() {
     return ph;
 }
 
-NodeOfList *create_node(const char *text) {
+NodeOfList *create_node(const char *text, int g_id) {
     NodeOfList *new_node = NULL;
     char *copytext = NULL;
 
@@ -119,40 +116,55 @@ NodeOfList *create_node(const char *text) {
         new_node->data = fill_struct(copytext);
         new_node->next = NULL;
         new_node->prev = NULL;
-        new_node->id = g_id++;
+        new_node->id = g_id;
     }
     return new_node;
 }
 
-void print() {
+void help() {
+    printf("To display the data, enter the command \"!print\"\n"
+           "To find athletes, enter the command \"!find\"\n"
+           "To sort the data, enter the command \"!sort\"\n"
+           "To add new data, enter the command \"!add\"\n"
+           "To edit the data, enter the command \"!edit\"\n"
+           "To remove elements of the data, enter the command \"!delete\"\n"
+           "To save the data, enter the command \"!save\"\n"
+           "To end the program, enter the command \"!end\"\n");
+    getchar();
+    getchar();
+}
+
+void print(ListOfAthlete *list) {
 
 }
 
-void find() {
+void find(ListOfAthlete *list) {
 
 }
 
-void sort() {
+void sort(ListOfAthlete *list) {
 
 }
 
-void add() {
+void add(ListOfAthlete *list) {
 
 }
 
-void edit() {
+void edit(ListOfAthlete *list) {
 
 }
 
-void delete() {
+void delete(ListOfAthlete *list) {
 
 }
 
-void save() {
+void save(ListOfAthlete *list) {
 
 }
 
 int main() {
+    ListOfAthlete *list;
+    int g_id, cl;
     char filename[128], str[128], text[1024];
     NodeOfList *cur_node = NULL, *prev_node = NULL;
     FILE *f;
@@ -169,15 +181,17 @@ int main() {
     }
 
     g_id = 1;
+    cl = 1;
     list = make_list();
     while (fgets(text, sizeof(text), f)) {
-        cur_node = create_node(text);
+        cur_node = create_node(text, g_id++);
         cur_node->prev = prev_node;
         if (list->length == 0) {
             list->first = cur_node;
         } else {
             prev_node->next = cur_node;
         }
+        list->last = cur_node;
         prev_node = cur_node;
         ++list->length;
     }
@@ -186,26 +200,33 @@ int main() {
 
 
     do {
+        if (cl) printf("Write \"!help\" to see the list of commands.\n");
         scanf("%s", str);
-        if (!strcmp(str, "!print")) {
-            print();
+        cl = 1;
+        if (!strcmp(str, "!help")) {
+            help();
+        } else if (!strcmp(str, "!print")) {
+            print(list);
         } else if (!strcmp(str, "!find")) {
-            find();
+            find(list);
         } else if (!strcmp(str, "!sort")) {
-            sort();
+            sort(list);
         } else if (!strcmp(str, "!add")) {
-            add();
+            add(list);
         } else if (!strcmp(str, "!edit")) {
-            edit();
+            edit(list);
         } else if (!strcmp(str, "!delete")) {
-            delete();
+            delete(list);
         } else if (!strcmp(str, "!save")) {
-            save();
+            save(list);
         } else if (!strcmp(str, "!end")) {
             printf("Goodbye!\n");
+            cl = 0;
         } else {
             printf("Unknown command!\n");
+            cl = 0;
         }
+        if (cl); // clear
     } while (strcmp(str, "!end") != 0);
     return 0;
 }
