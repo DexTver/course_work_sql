@@ -161,17 +161,17 @@ void wait() {
 
 /* print */
 void print_line() {
-    printf("+%*c+------------+-----+--------+--------"
-           "+------+------+------+-------+\n", 22, '-');
+    printf("+----+----------------------+------------+-----+--------+--------"
+           "+------+------+------+-------+\n");
 }
 
 void print_head() {
-    printf("| Name                 | University | Age | Weight | Height "
-           "| Res1 | Res2 | Res3 | Index |\n");
+    printf("| ID | %-20s | University | Age | Weight | Height "
+           "| Res1 | Res2 | Res3 | Index |\n", "Name");
 }
 
-void print_node(const Athlete *node) {
-    printf("| %-20s | %-10s | %-3i | %0.1f  ", node->name, node->university,
+void print_node(const Athlete *node, int id) {
+    printf("| %-2i | %-20s | %-10s | %-3i | %0.1f  ", id, node->name, node->university,
            node->age, node->weight);
     if (node->weight < 100) printf(" ");
     printf("| %-6i | %-4i | %-4i | %-4i ", node->height, node->result[0],
@@ -188,7 +188,7 @@ void print(const ListOfAthlete *list) {
     print_head();
     print_line();
     while (cur_node != NULL) {
-        print_node(cur_node->data);
+        print_node(cur_node->data, cur_node->id);
         cur_node = cur_node->next;
     }
     print_line();
@@ -216,10 +216,11 @@ void sorted(int *mas, const ListOfAthlete *list, int param) {
         for (int i = 0; cur_node != NULL && i < list->length; ++i, cur_node = cur_node->next) {
             if (mas[i] == 1) {
                 if ((min_node == NULL) ||
-                    ((param == 1 && min_node->data->age > cur_node->data->age) ||
-                     (param == 2 && min_node->data->weight > cur_node->data->weight) ||
-                     (param == 3 && min_node->data->height > cur_node->data->height) ||
-                     (param == 4 && min_node->data->index > cur_node->data->index))) {
+                    ((param == 1 && min_node->id > cur_node->id) ||
+                     (param == 2 && min_node->data->age > cur_node->data->age) ||
+                     (param == 3 && min_node->data->weight > cur_node->data->weight) ||
+                     (param == 4 && min_node->data->height > cur_node->data->height) ||
+                     (param == 5 && min_node->data->index > cur_node->data->index))) {
                     min_node = cur_node;
                     ind = i;
                 }
@@ -227,7 +228,7 @@ void sorted(int *mas, const ListOfAthlete *list, int param) {
         }
         if (min_node != NULL) {
             mas[ind] = 2;
-            print_node(min_node->data);
+            print_node(min_node->data, min_node->id);
         }
     }
 
@@ -245,15 +246,16 @@ void find(ListOfAthlete *list) {
 
     do {
         printf("Select a field to find by:\n"
-               "1 = name\n"
-               "2 = university\n"
+               "1 = id\n"
+               "2 = name\n"
+               "3 = university\n"
                "0 = exit\n"
                "Enter only one number!\n");
         scanf("%i", &param);
-        if (param < 1 || 2 < param) {
+        if (param < 1 || 3 < param) {
             printf("Invalid command!\n");
         }
-    } while (param < 0 || 2 < param);
+    } while (param < 0 || 3 < param);
     if (param != 0) {
         printf("Enter the search string:\n");
         getchar();
@@ -264,16 +266,17 @@ void find(ListOfAthlete *list) {
         strlwr(x);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
-            if (param == 1) str = cur_node->data->name;
-            else str = cur_node->data->university;
+            if (param == 2) str = cur_node->data->name;
+            if (param == 3) str = cur_node->data->university;
             new_str = m_strlwr(str);
-            if (strstr(new_str, x) != NULL) {
+            if ((param != 1 && strstr(new_str, x) != NULL) ||
+                (param == 1 && from_str_to_int(x) == cur_node->id)) {
                 if (fl == 0) {
                     print_line();
                     print_head();
                     print_line();
                 }
-                print_node(cur_node->data);
+                print_node(cur_node->data, cur_node->id);
                 fl = 1;
                 mas[i] = 1;
             } else {
@@ -289,14 +292,15 @@ void find(ListOfAthlete *list) {
             print_line();
             do {
                 printf("Select a field to sort by or exit:\n"
-                       "1 = age\n"
-                       "2 = weight\n"
-                       "3 = height\n"
-                       "4 = index\n"
+                       "1 = id\n"
+                       "2 = age\n"
+                       "3 = weight\n"
+                       "4 = height\n"
+                       "5 = index\n"
                        "0 = exit\n"
                        "Enter only one number!\n");
                 scanf("%i", &param);
-                if (param < 0 || 4 < param) {
+                if (param < 0 || 5 < param) {
                     printf("Invalid command!\n");
                 } else if (param != 0) {
                     print_line();
@@ -353,22 +357,24 @@ void sort(ListOfAthlete *list) {
 
     do {
         printf("Select a field to sort by or exit:\n"
-               "1 = age\n"
-               "2 = weight\n"
-               "3 = height\n"
-               "4 = index\n"
+               "1 = id\n"
+               "2 = age\n"
+               "3 = weight\n"
+               "4 = height\n"
+               "5 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
         scanf("%i", &param);
-        if (param < 0 || 4 < param) {
+        if (param < 0 || 5 < param) {
             printf("Invalid command!\n");
         } else if (param != 0) {
             for (int i = 0; i < n; ++i) {
                 for (int j = i; j < n; ++j) {
-                    if ((param == 1 && mas[i]->data->age > mas[j]->data->age) ||
-                        (param == 2 && mas[i]->data->weight > mas[j]->data->weight) ||
-                        (param == 3 && mas[i]->data->height > mas[j]->data->height) ||
-                        (param == 4 && mas[i]->data->index > mas[j]->data->index)) {
+                    if ((param == 1 && mas[i]->id > mas[j]->id) ||
+                        (param == 2 && mas[i]->data->age > mas[j]->data->age) ||
+                        (param == 3 && mas[i]->data->weight > mas[j]->data->weight) ||
+                        (param == 4 && mas[i]->data->height > mas[j]->data->height) ||
+                        (param == 5 && mas[i]->data->index > mas[j]->data->index)) {
                         my_swap(mas, list, i, j);
                     }
                 }
