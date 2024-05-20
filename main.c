@@ -172,8 +172,66 @@ void find(ListOfAthlete *list) {
 
 }
 
-void sort(ListOfAthlete *list) {
+NodeOfList **get_mas(const ListOfAthlete *list) {
+    NodeOfList *cur_node = list->first;
+    NodeOfList **mas = NULL;
 
+    mas = (NodeOfList **) malloc(list->length * sizeof(NodeOfList *));
+    if (mas != NULL) {
+        for (int i = 0; cur_node != NULL; ++i) {
+            mas[i] = cur_node;
+            cur_node = cur_node->next;
+        }
+    }
+    return mas;
+}
+
+void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
+    NodeOfList *q;
+
+    if (i == 0) {
+        list->first = mas[j];
+    } else {
+        mas[i - 1]->next = mas[j];
+    }
+    mas[j - 1]->next = mas[i];
+    q = mas[j]->next;
+    mas[j]->next = mas[i]->next;
+    mas[i]->next = q;
+    q = mas[i];
+    mas[i] = mas[j];
+    mas[j] = q;
+}
+
+void sort(ListOfAthlete *list) {
+    NodeOfList **mas = get_mas(list);
+    int n = list->length, param = -1;
+    while (param != 0) {
+        printf("Select a field to sort by:\n"
+               "1 = age\n"
+               "2 = weight\n"
+               "3 = height\n"
+               "4 = index\n"
+               "0 = exit\n"
+               "Enter only one number!\n");
+        scanf("%i", &param);
+        if (param < 0 || 4 < param) {
+            printf("Invalid command!\n");
+        } else if (param != 0) {
+            for (int i = 0; i < n; ++i) {
+                for (int j = i; j < n; ++j) {
+                    if ((param == 1 && mas[i]->data->age > mas[j]->data->age) ||
+                        (param == 2 && mas[i]->data->weight > mas[j]->data->weight) ||
+                        (param == 3 && mas[i]->data->height > mas[j]->data->height) ||
+                        (param == 4 && mas[i]->data->index > mas[j]->data->index)) {
+                        my_swap(mas, list, i, j);
+                    }
+                }
+            }
+            print(list);
+        }
+    }
+    free(mas);
 }
 
 void add(ListOfAthlete *list) {
@@ -243,6 +301,7 @@ int main() {
         if (!strcmp(str, "!print")) {
             CLS;
             print(list);
+            wait();
         } else if (!strcmp(str, "!find")) {
             CLS;
             print(list);
@@ -251,6 +310,7 @@ int main() {
             CLS;
             print(list);
             sort(list);
+            CLS;
         } else if (!strcmp(str, "!add")) {
             CLS;
             print(list);
@@ -269,14 +329,9 @@ int main() {
             save(list);
         } else if (!strcmp(str, "!end")) {
             printf("Goodbye!\n");
-            cl = 0;
         } else {
             printf("Unknown command!\n");
             cl = 0;
-        }
-        if (cl) {
-            wait();
-            CLS;
         }
     } while (strcmp(str, "!end") != 0);
     return 0;
