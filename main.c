@@ -34,7 +34,9 @@ typedef struct ListOfAthlete {
 
 /* struct fill */
 int from_str_to_int(char *x) {
-    int ans = 0;
+    int ans;
+
+    ans = 0;
 
     while (*x != '\0') {
         ans = ans * 10 + (*x - '0');
@@ -44,7 +46,11 @@ int from_str_to_int(char *x) {
 }
 
 float from_str_to_float(char *x) {
-    float ans = 0, a = 10, b = 1;
+    float ans, a, b;
+
+    ans = 0;
+    a = 10;
+    b = 1;
 
     while (*x != '\0') {
         if (*x == '.' || *x == ',') {
@@ -60,7 +66,10 @@ float from_str_to_float(char *x) {
 }
 
 void from_str_to_int_mas(char *x, int *mas) {
-    int ind = 0, j = 0;
+    int ind, j;
+
+    ind = 0;
+    j = 0;
 
     while (x[j] != '\0') {
         if (x[j] == ';') {
@@ -76,9 +85,12 @@ void from_str_to_int_mas(char *x, int *mas) {
 
 Athlete *fill_struct(char *str) {
     Athlete *user = NULL;
-    char *word = str;
-    int ind = 0, tt;
+    char *word;
+    int ind, tt;
     char *pole[5];
+
+    word = str;
+    ind = 0;
 
     user = (Athlete *) malloc(sizeof(Athlete));
     if (user != NULL) {
@@ -104,6 +116,7 @@ Athlete *fill_struct(char *str) {
 /* constructor */
 ListOfAthlete *make_list() {
     ListOfAthlete *ph = NULL;
+
     ph = (ListOfAthlete *) malloc(sizeof(ListOfAthlete));
     if (ph != NULL) {
         ph->length = 0;
@@ -148,10 +161,8 @@ void wait() {
 
 /* print */
 void print_line() {
-    printf("+");
-    for (int i = 0; i < 22; printf("-"), ++i);
-    printf("+------------+-----+--------+--------"
-           "+------+------+------+-------+\n");
+    printf("+%*c+------------+-----+--------+--------"
+           "+------+------+------+-------+\n", 22, '-');
 }
 
 void print_head() {
@@ -169,7 +180,10 @@ void print_node(const Athlete *node) {
 }
 
 void print(const ListOfAthlete *list) {
-    NodeOfList *cur_node = list->first;
+    NodeOfList *cur_node;
+
+    cur_node = list->first;
+
     print_line();
     print_head();
     print_line();
@@ -183,8 +197,8 @@ void print(const ListOfAthlete *list) {
 /* find */
 char *m_strlwr(const char *str) {
     char *new_str = NULL;
-    new_str = (char *) malloc((strlen(str) + 1) * sizeof(char));
 
+    new_str = (char *) malloc((strlen(str) + 1) * sizeof(char));
     if (new_str != NULL) {
         strcpy(new_str, str);
         strlwr(new_str);
@@ -223,9 +237,11 @@ void sorted(int *mas, const ListOfAthlete *list, int param) {
 }
 
 void find(ListOfAthlete *list) {
-    NodeOfList *cur_node = list->first;
+    NodeOfList *cur_node;
     char x[128], *str, *new_str;
     int mas[list->length], fl, param;
+
+    cur_node = list->first;
 
     do {
         printf("Select a field to find by:\n"
@@ -296,8 +312,10 @@ void find(ListOfAthlete *list) {
 
 /* sort */
 NodeOfList **get_mas(const ListOfAthlete *list) {
-    NodeOfList *cur_node = list->first;
+    NodeOfList *cur_node;
     NodeOfList **mas = NULL;
+
+    cur_node = list->first;
 
     mas = (NodeOfList **) malloc(list->length * sizeof(NodeOfList *));
     if (mas != NULL) {
@@ -327,8 +345,12 @@ void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
 }
 
 void sort(ListOfAthlete *list) {
-    NodeOfList **mas = get_mas(list);
-    int n = list->length, param;
+    NodeOfList **mas;
+    int n, param;
+
+    n = list->length;
+    mas = get_mas(list);
+
     do {
         printf("Select a field to sort by or exit:\n"
                "1 = age\n"
@@ -380,6 +402,10 @@ int main() {
     NodeOfList *cur_node = NULL, *prev_node = NULL;
     FILE *f;
 
+    g_id = 1;
+    cl = 1;
+    list = make_list();
+
     printf("Please enter the file name:\n");
     scanf("%s", filename);
     f = fopen(filename, "r");
@@ -391,9 +417,6 @@ int main() {
         f = fopen(filename, "r");
     }
 
-    g_id = 1;
-    cl = 1;
-    list = make_list();
     while (fgets(text, sizeof(text), f)) {
         cur_node = create_node(text, g_id++);
         cur_node->prev = prev_node;
