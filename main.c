@@ -2,6 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef WIN32
+#define CLS system("cls")
+#else
+#define CLS system("clear")
+#endif
+
 
 typedef struct Athlete {
     char *name;
@@ -130,12 +136,36 @@ void help() {
            "To remove elements of the data, enter the command \"!delete\"\n"
            "To save the data, enter the command \"!save\"\n"
            "To end the program, enter the command \"!end\"\n");
-    getchar();
-    getchar();
 }
 
-void print(ListOfAthlete *list) {
+void print_line() {
+    printf("+");
+    for (int i = 0; i < 22; printf("-"), ++i);
+    printf("+------------+-----+--------+--------"
+           "+------+------+------+-------+\n");
+}
 
+void print_node(const Athlete *node) {
+    printf("| %-20s | %-10s | %-3i | %0.1f  ", node->name, node->university,
+           node->age, node->weight);
+    if (node->weight < 100) printf(" ");
+    printf("| %-6i | %-4i | %-4i | %-4i ", node->height, node->result[0],
+           node->result[1], node->result[2]);
+    printf("| %0.3f |\n", node->index);
+}
+
+void print(const ListOfAthlete *list) {
+    NodeOfList *cur_node = list->first;
+
+    print_line();
+    printf("| Name                 | University | Age | Weight | Height "
+           "| Res1 | Res2 | Res3 | Index |\n");
+    print_line();
+    while (cur_node != NULL) {
+        print_node(cur_node->data);
+        cur_node = cur_node->next;
+    }
+    print_line();
 }
 
 void find(ListOfAthlete *list) {
@@ -160,6 +190,12 @@ void delete(ListOfAthlete *list) {
 
 void save(ListOfAthlete *list) {
 
+}
+
+void wait() {
+    printf("\nTo continue press \"Enter\"...");
+    getchar();
+    getchar();
 }
 
 int main() {
@@ -195,29 +231,41 @@ int main() {
         prev_node = cur_node;
         ++list->length;
     }
+
+    CLS;
     printf("The file has successfully been processed!\n");
     fclose(f);
 
-
     do {
-        if (cl) printf("Write \"!help\" to see the list of commands.\n");
-        scanf("%s", str);
+        if (cl) help();
         cl = 1;
-        if (!strcmp(str, "!help")) {
-            help();
-        } else if (!strcmp(str, "!print")) {
+        scanf("%s", str);
+        if (!strcmp(str, "!print")) {
+            CLS;
             print(list);
         } else if (!strcmp(str, "!find")) {
+            CLS;
+            print(list);
             find(list);
         } else if (!strcmp(str, "!sort")) {
+            CLS;
+            print(list);
             sort(list);
         } else if (!strcmp(str, "!add")) {
+            CLS;
+            print(list);
             add(list);
         } else if (!strcmp(str, "!edit")) {
+            CLS;
+            print(list);
             edit(list);
         } else if (!strcmp(str, "!delete")) {
+            CLS;
+            print(list);
             delete(list);
         } else if (!strcmp(str, "!save")) {
+            CLS;
+            print(list);
             save(list);
         } else if (!strcmp(str, "!end")) {
             printf("Goodbye!\n");
@@ -226,7 +274,10 @@ int main() {
             printf("Unknown command!\n");
             cl = 0;
         }
-        if (cl); // clear
+        if (cl) {
+            wait();
+            CLS;
+        }
     } while (strcmp(str, "!end") != 0);
     return 0;
 }
