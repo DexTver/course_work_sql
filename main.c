@@ -244,6 +244,7 @@ void find(ListOfAthlete *list) {
 
     cur_node = list->first;
 
+    print(list);
     do {
         printf("Select a field to find by:\n"
                "1 = id\n"
@@ -355,6 +356,7 @@ void sort(ListOfAthlete *list) {
     n = list->length;
     mas = get_mas(list);
 
+    print(list);
     do {
         printf("Select a field to sort by or exit:\n"
                "1 = id\n"
@@ -393,8 +395,99 @@ void edit(ListOfAthlete *list) {
 
 }
 
+/* delete */
 void delete(ListOfAthlete *list) {
+    NodeOfList *cur_node;
+    char x[128], *str, *new_str, ch;
+    int mas[list->length], fl, param, cnt;
 
+    cur_node = list->first;
+
+    print(list);
+    do {
+        printf("Select a field to delete by:\n"
+               "1 = id\n"
+               "2 = name\n"
+               "3 = university\n"
+               "0 = exit\n"
+               "Enter only one number!\n");
+        scanf("%i", &param);
+        if (param < 1 || 3 < param) {
+            printf("Invalid command!\n");
+        }
+    } while (param < 0 || 3 < param);
+    if (param != 0) {
+        printf("Enter the delete string:\n");
+        getchar();
+        fgets(x, sizeof(x), stdin);
+        x[strlen(x) - 1] = '\0';
+        CLS;
+        printf("%s\n", x);
+        strlwr(x);
+        fl = 0;
+        for (int i = 0; cur_node != NULL && i < list->length; ++i) {
+            if (param == 2) str = cur_node->data->name;
+            if (param == 3) str = cur_node->data->university;
+            new_str = m_strlwr(str);
+            if ((param != 1 && strstr(new_str, x) != NULL) ||
+                (param == 1 && from_str_to_int(x) == cur_node->id)) {
+                if (fl == 0) {
+                    print_line();
+                    print_head();
+                    print_line();
+                }
+                print_node(cur_node->data, cur_node->id);
+                fl = 1;
+                mas[i] = 1;
+            } else {
+                mas[i] = 0;
+            }
+            free(new_str);
+            cur_node = cur_node->next;
+        }
+        if (fl == 0) {
+            printf("No matches found!\n");
+            wait();
+        } else {
+            print_line();
+            printf("Are you sure you want to delete these athletes? (Y/N)\n");
+            do {
+                scanf("%c", &ch);
+            } while (ch != 'Y' && ch != 'N');
+            if (ch == 'Y') {
+                cnt = 0;
+                cur_node = list->first;
+                for (int i = 0; i < list->length; ++i) {
+                    if (mas[i] == 1) {
+                        cnt++;
+                        if (cur_node->prev == NULL) {  /* первая вершина */
+                            cur_node = cur_node->next;
+                            list->first = cur_node;
+                            free(cur_node->prev->data);
+                            free(cur_node->prev);
+                            cur_node->prev = NULL; /* ? */
+                        } else if (cur_node->next == NULL) { /* последняя вершина */
+                            cur_node = cur_node->prev;
+                            list->last = cur_node;
+                            free(cur_node->next->data);
+                            free(cur_node->next);
+                            cur_node->next = NULL; /* ? */
+                        } else {
+                            cur_node->next->prev = cur_node->prev;
+                            cur_node->prev->next = cur_node->next;
+                            cur_node = cur_node->next;
+                            free(cur_node->prev->data);
+                            free(cur_node->prev);
+                        }
+                    }
+                }
+                list->length -= cnt;
+                print(list);
+                getchar();
+                wait();
+            }
+        }
+    }
 }
 
 void save(ListOfAthlete *list) {
@@ -405,7 +498,7 @@ int main() {
     ListOfAthlete *list;
     int g_id, cl;
     char filename[128], str[128], text[1024];
-    NodeOfList *cur_node = NULL, *prev_node = NULL;
+    NodeOfList *cur_node = NULL;
     FILE *f;
 
     g_id = 1;
@@ -425,14 +518,13 @@ int main() {
 
     while (fgets(text, sizeof(text), f)) {
         cur_node = create_node(text, g_id++);
-        cur_node->prev = prev_node;
+        cur_node->prev = list->last;
         if (list->length == 0) {
             list->first = cur_node;
         } else {
-            prev_node->next = cur_node;
+            list->last->next = cur_node;
         }
         list->last = cur_node;
-        prev_node = cur_node;
         ++list->length;
     }
 
@@ -452,12 +544,10 @@ int main() {
             CLS;
         } else if (!strcmp(str, "!find")) {
             CLS;
-            print(list);
             find(list);
             CLS;
         } else if (!strcmp(str, "!sort")) {
             CLS;
-            print(list);
             sort(list);
             CLS;
         } else if (!strcmp(str, "!add")) {
@@ -470,8 +560,8 @@ int main() {
             edit(list);
         } else if (!strcmp(str, "!delete")) {
             CLS;
-            print(list);
             delete(list);
+            CLS;
         } else if (!strcmp(str, "!save")) {
             CLS;
             print(list);
