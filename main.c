@@ -71,7 +71,7 @@ void from_str_to_int_mas(char *x, int *mas) {
     ind = 0;
     j = 0;
 
-    while (x[j] != '\0') {
+    while (x[j] != '\0' && ind < 3) {
         if (x[j] == ';') {
             x[j] = '\0';
             mas[ind++] = from_str_to_int(x);
@@ -80,7 +80,7 @@ void from_str_to_int_mas(char *x, int *mas) {
         }
         ++j;
     }
-    mas[ind] = from_str_to_int(x);
+    if (ind < 3) mas[ind] = from_str_to_int(x);
 }
 
 Athlete *fill_struct(char *str) {
@@ -180,16 +180,11 @@ void print_node(const Athlete *node, int id) {
 }
 
 void print(const ListOfAthlete *list) {
-    NodeOfList *cur_node;
-
-    cur_node = list->first;
-
     print_line();
     print_head();
     print_line();
-    while (cur_node != NULL) {
+    for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
         print_node(cur_node->data, cur_node->id);
-        cur_node = cur_node->next;
     }
     print_line();
 }
@@ -397,7 +392,7 @@ void edit(ListOfAthlete *list) {
 
 /* delete */
 void delete(ListOfAthlete *list) {
-    NodeOfList *cur_node;
+    NodeOfList *cur_node, *prev_node;
     char x[128], *str, *new_str, ch;
     int mas[list->length], fl, param, cnt;
 
@@ -465,20 +460,23 @@ void delete(ListOfAthlete *list) {
                             list->first = cur_node;
                             free(cur_node->prev->data);
                             free(cur_node->prev);
-                            cur_node->prev = NULL; /* ? */
+                            cur_node->prev = NULL;
                         } else if (cur_node->next == NULL) { /* последняя вершина */
                             cur_node = cur_node->prev;
                             list->last = cur_node;
                             free(cur_node->next->data);
                             free(cur_node->next);
-                            cur_node->next = NULL; /* ? */
+                            cur_node->next = NULL;
                         } else {
                             cur_node->next->prev = cur_node->prev;
                             cur_node->prev->next = cur_node->next;
+                            prev_node = cur_node;
                             cur_node = cur_node->next;
-                            free(cur_node->prev->data);
-                            free(cur_node->prev);
+                            free(prev_node->data);
+                            free(prev_node);
                         }
+                    } else {
+                        cur_node = cur_node->next;
                     }
                 }
                 list->length -= cnt;
@@ -490,8 +488,25 @@ void delete(ListOfAthlete *list) {
     }
 }
 
+/* save */
 void save(ListOfAthlete *list) {
+    FILE *f;
+    char filename[128];
 
+    print(list);
+    printf("Please enter the name of the file you want to save the data to:\n");
+    scanf("%s", filename); /* Добавить проверку на спец. символы*/
+    f = fopen(filename, "w");
+    for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
+        fprintf(f, "%s;%s;%i;%0.1f;%i;%i;%i;%i\n", cur_node->data->name,
+                cur_node->data->university,
+                cur_node->data->age, cur_node->data->weight, cur_node->data->height,
+                cur_node->data->result[0], cur_node->data->result[1],
+                cur_node->data->result[2]);
+    }
+    fclose(f);
+    getchar();
+    wait();
 }
 
 int main() {
@@ -518,14 +533,16 @@ int main() {
 
     while (fgets(text, sizeof(text), f)) {
         cur_node = create_node(text, g_id++);
-        cur_node->prev = list->last;
-        if (list->length == 0) {
-            list->first = cur_node;
-        } else {
-            list->last->next = cur_node;
+        if (cur_node != NULL) {
+            cur_node->prev = list->last;
+            if (list->length == 0) {
+                list->first = cur_node;
+            } else {
+                list->last->next = cur_node;
+            }
+            list->last = cur_node;
+            ++list->length;
         }
-        list->last = cur_node;
-        ++list->length;
     }
 
     CLS;
@@ -564,8 +581,8 @@ int main() {
             CLS;
         } else if (!strcmp(str, "!save")) {
             CLS;
-            print(list);
             save(list);
+            CLS;
         } else if (!strcmp(str, "!end")) {
             printf("Goodbye!\n");
         } else {
