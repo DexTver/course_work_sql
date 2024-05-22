@@ -37,7 +37,6 @@ int from_str_to_int(char *x) {
     int ans;
 
     ans = 0;
-
     while (*x != '\0') {
         ans = ans * 10 + (*x - '0');
         ++x;
@@ -51,7 +50,6 @@ float from_str_to_float(char *x) {
     ans = 0;
     a = 10;
     b = 1;
-
     while (*x != '\0') {
         if (*x == '.' || *x == ',') {
             a = 1;
@@ -70,7 +68,6 @@ void from_str_to_int_mas(char *x, int *mas) {
 
     ind = 0;
     j = 0;
-
     while (x[j] != '\0' && ind < 3) {
         if (x[j] == ';') {
             x[j] = '\0';
@@ -85,13 +82,11 @@ void from_str_to_int_mas(char *x, int *mas) {
 
 Athlete *fill_struct(char *str) {
     Athlete *user = NULL;
-    char *word;
+    char *word, *pole[5];
     int ind, tt;
-    char *pole[5];
 
     word = str;
     ind = 0;
-
     user = (Athlete *) malloc(sizeof(Athlete));
     if (user != NULL) {
         for (tt = 0; str[tt] != '\n' && str[tt] != '\0'; ++tt) {
@@ -145,7 +140,7 @@ NodeOfList *create_node(const char *text, int g_id) {
 /* help */
 void help() {
     printf("To display the data, enter the command \"!print\"\n"
-           "To find athletes, enter the command \"!find\"\n"
+           "To find elements of the data, enter the command \"!find\"\n"
            "To sort the data, enter the command \"!sort\"\n"
            "To add new data, enter the command \"!add\"\n"
            "To edit the data, enter the command \"!edit\"\n"
@@ -161,22 +156,26 @@ void wait() {
 
 /* print */
 void print_line() {
-    printf("+----+----------------------+------------+-----+--------+--------"
-           "+------+------+------+-------+\n");
+    printf("+----+----------------------+------------+-----+--------+--------+------+------+------+-------+\n");
 }
 
 void print_head() {
-    printf("| ID | %-20s | University | Age | Weight | Height "
-           "| Res1 | Res2 | Res3 | Index |\n", "Name");
+    printf("| ID | %-20s | University | Age | Weight | Height | Res1 | Res2 | Res3 | Index |\n", "Name");
 }
 
-void print_node(const Athlete *node, int id) {
-    printf("| %-2i | %-20s | %-10s | %-3i | %0.1f  ", id, node->name, node->university,
-           node->age, node->weight);
-    if (node->weight < 100) printf(" ");
-    printf("| %-6i | %-4i | %-4i | %-4i ", node->height, node->result[0],
-           node->result[1], node->result[2]);
-    printf("| %0.3f |\n", node->index);
+void print_node(NodeOfList *node) {
+    printf("| %-2i | %-20s | %-10s | %-3i | %0.1f  ", node->id, node->data->name, node->data->university, node->data->age, node->data->weight);
+    if (node->data->weight < 100) printf(" ");
+    printf("| %-6i | %-4i | %-4i | %-4i ", node->data->height, node->data->result[0], node->data->result[1], node->data->result[2]);
+    printf("| %0.3f |\n", node->data->index);
+}
+
+void print_one(NodeOfList *the_node) {
+    print_line();
+    print_head();
+    print_line();
+    print_node(the_node);
+    print_line();
 }
 
 void print(const ListOfAthlete *list) {
@@ -184,7 +183,7 @@ void print(const ListOfAthlete *list) {
     print_head();
     print_line();
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
-        print_node(cur_node->data, cur_node->id);
+        print_node(cur_node);
     }
     print_line();
 }
@@ -223,10 +222,9 @@ void sorted(int *mas, const ListOfAthlete *list, int param) {
         }
         if (min_node != NULL) {
             mas[ind] = 2;
-            print_node(min_node->data, min_node->id);
+            print_node(min_node);
         }
     }
-
     for (int j = 0; j < list->length; ++j) {
         if (mas[j] == 2) mas[j] = 1;
     }
@@ -238,7 +236,6 @@ void find(ListOfAthlete *list) {
     int mas[list->length], fl, param;
 
     cur_node = list->first;
-
     print(list);
     do {
         printf("Select a field to find by:\n"
@@ -272,7 +269,7 @@ void find(ListOfAthlete *list) {
                     print_head();
                     print_line();
                 }
-                print_node(cur_node->data, cur_node->id);
+                print_node(cur_node);
                 fl = 1;
                 mas[i] = 1;
             } else {
@@ -316,7 +313,6 @@ NodeOfList **get_mas(const ListOfAthlete *list) {
     NodeOfList **mas = NULL;
 
     cur_node = list->first;
-
     mas = (NodeOfList **) malloc(list->length * sizeof(NodeOfList *));
     if (mas != NULL) {
         for (int i = 0; cur_node != NULL; ++i) {
@@ -350,7 +346,6 @@ void sort(ListOfAthlete *list) {
 
     n = list->length;
     mas = get_mas(list);
-
     print(list);
     do {
         printf("Select a field to sort by or exit:\n"
@@ -382,6 +377,7 @@ void sort(ListOfAthlete *list) {
     free(mas);
 }
 
+/* add */
 void add(ListOfAthlete *list, int g_id) {
     char text[1024];
     NodeOfList *cur_node;
@@ -407,8 +403,94 @@ void add(ListOfAthlete *list, int g_id) {
     wait();
 }
 
+/* edit */
 void edit(ListOfAthlete *list) {
+    NodeOfList *the_node = NULL;
+    int id;
+    char str[1028];
 
+    print(list);
+    printf("Enter the ID of the Athlete you want to edit or 0 to exit:\n");
+    scanf("%i", &id);
+    getchar();
+    for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
+        if (cur_node->id == id) {
+            the_node = cur_node;
+            print_one(the_node);
+        }
+    }
+    if (the_node != NULL) {
+        printf("\nCurrent name: %s\n"
+               "Enter new name of '-' to skip:\n", the_node->data->name);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->name = strdup(str);
+        }
+
+        printf("\nCurrent university: %s\n"
+               "Enter new name of '-' to skip:\n", the_node->data->university);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->university = strdup(str);
+        }
+
+        printf("\nCurrent age: %i\n"
+               "Enter new name of '-' to skip:\n", the_node->data->age);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->age = from_str_to_int(str);
+        }
+
+        printf("\nCurrent weight: %0.1f\n"
+               "Enter new name of '-' to skip:\n", the_node->data->weight);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->weight = from_str_to_float(str);
+        }
+
+        printf("\nCurrent height: %i\n"
+               "Enter new name of '-' to skip:\n", the_node->data->height);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->height = from_str_to_int(str);
+        }
+
+        printf("\nCurrent Res1: %i\n"
+               "Enter new name of '-' to skip:\n", the_node->data->result[0]);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->result[0] = from_str_to_int(str);
+        }
+
+        printf("\nCurrent Res2: %i\n"
+               "Enter new name of '-' to skip:\n", the_node->data->result[1]);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->result[1] = from_str_to_int(str);
+        }
+
+        printf("\nCurrent Res3: %i\n"
+               "Enter new name of '-' to skip:\n", the_node->data->result[2]);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
+        if (strcmp(str, "-") != 0) {
+            the_node->data->result[2] = from_str_to_int(str);
+        }
+
+        the_node->data->index = (float) (the_node->data->result[0] + the_node->data->result[1] + the_node->data->result[2]) / the_node->data->weight;
+        print_one(the_node);
+        wait();
+    } else if (id != 0) {
+        printf("Element not found!\n");
+        wait();
+    }
 }
 
 /* delete */
@@ -418,7 +500,6 @@ void delete(ListOfAthlete *list) {
     int mas[list->length], fl, param, cnt;
 
     cur_node = list->first;
-
     print(list);
     do {
         printf("Select a field to delete by:\n"
@@ -452,7 +533,7 @@ void delete(ListOfAthlete *list) {
                     print_head();
                     print_line();
                 }
-                print_node(cur_node->data, cur_node->id);
+                print_node(cur_node);
                 fl = 1;
                 mas[i] = 1;
             } else {
@@ -516,14 +597,10 @@ void save(ListOfAthlete *list) {
 
     print(list);
     printf("Please enter the name of the file to save the data to:\n");
-    scanf("%s", filename); /* Добавить проверку на спец. символы*/
+    scanf("%s", filename);
     f = fopen(filename, "w");
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
-        fprintf(f, "%s;%s;%i;%0.1f;%i;%i;%i;%i\n", cur_node->data->name,
-                cur_node->data->university,
-                cur_node->data->age, cur_node->data->weight, cur_node->data->height,
-                cur_node->data->result[0], cur_node->data->result[1],
-                cur_node->data->result[2]);
+        fprintf(f, "%s;%s;%i;%0.1f;%i;%i;%i;%i\n", cur_node->data->name, cur_node->data->university, cur_node->data->age, cur_node->data->weight, cur_node->data->height, cur_node->data->result[0], cur_node->data->result[1], cur_node->data->result[2]);
     }
     fclose(f);
     printf("The file has been successfully written!\n");
@@ -541,7 +618,6 @@ int main() {
     g_id = 1;
     cl = 1;
     list = make_list();
-
     printf("Please enter the file name:\n");
     scanf("%s", filename);
     f = fopen(filename, "r");
@@ -595,8 +671,8 @@ int main() {
             CLS;
         } else if (!strcmp(str, "!edit")) {
             CLS;
-            print(list);
             edit(list);
+            CLS;
         } else if (!strcmp(str, "!delete")) {
             CLS;
             delete(list);
