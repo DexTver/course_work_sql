@@ -382,8 +382,29 @@ void sort(ListOfAthlete *list) {
     free(mas);
 }
 
-void add(ListOfAthlete *list) {
+void add(ListOfAthlete *list, int g_id) {
+    char text[1024];
+    NodeOfList *cur_node;
 
+    print(list);
+    printf("Enter data of the athlete in format:\n"
+           "name;university;age;weight;height;result1,result2,result3\n");
+    getchar();
+    fgets(text, sizeof(text), stdin);
+    cur_node = create_node(text, g_id);
+    if (cur_node != NULL) {
+        cur_node->prev = list->last;
+        if (list->length == 0) {
+            list->first = cur_node;
+        } else {
+            list->last->next = cur_node;
+        }
+        list->last = cur_node;
+        ++list->length;
+        printf("The item has been successfully inserted!\n");
+    }
+    print(list);
+    wait();
 }
 
 void edit(ListOfAthlete *list) {
@@ -445,7 +466,7 @@ void delete(ListOfAthlete *list) {
             wait();
         } else {
             print_line();
-            printf("Are you sure you want to delete these athletes? (Y/N)\n");
+            printf("Are you sure want to delete these athletes? (Y/N)\n");
             do {
                 scanf("%c", &ch);
             } while (ch != 'Y' && ch != 'N');
@@ -494,7 +515,7 @@ void save(ListOfAthlete *list) {
     char filename[128];
 
     print(list);
-    printf("Please enter the name of the file you want to save the data to:\n");
+    printf("Please enter the name of the file to save the data to:\n");
     scanf("%s", filename); /* Добавить проверку на спец. символы*/
     f = fopen(filename, "w");
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
@@ -505,6 +526,7 @@ void save(ListOfAthlete *list) {
                 cur_node->data->result[2]);
     }
     fclose(f);
+    printf("The file has been successfully written!\n");
     getchar();
     wait();
 }
@@ -546,7 +568,7 @@ int main() {
     }
 
     CLS;
-    printf("The file has successfully been processed!\n");
+    printf("The file has been successfully processed!\n");
     fclose(f);
 
     do {
@@ -569,8 +591,8 @@ int main() {
             CLS;
         } else if (!strcmp(str, "!add")) {
             CLS;
-            print(list);
-            add(list);
+            add(list, g_id++);
+            CLS;
         } else if (!strcmp(str, "!edit")) {
             CLS;
             print(list);
