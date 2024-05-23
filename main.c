@@ -37,7 +37,7 @@ int from_str_to_int(char *x) {
     int ans;
 
     ans = 0;
-    while (*x != '\0') {
+    while (*x != '\0' && *x != '\n') {
         ans = ans * 10 + (*x - '0');
         ++x;
     }
@@ -50,7 +50,7 @@ float from_str_to_float(char *x) {
     ans = 0;
     a = 10;
     b = 1;
-    while (*x != '\0') {
+    while (*x != '\0' && *x != '\n') {
         if (*x == '.' || *x == ',') {
             a = 1;
             b = 10;
@@ -121,7 +121,7 @@ ListOfAthlete *make_list() {
     return ph;
 }
 
-NodeOfList *create_node(const char *text, int g_id) {
+NodeOfList *create_node(char *text, int g_id) {
     NodeOfList *new_node = NULL;
     char *copytext = NULL;
 
@@ -139,14 +139,15 @@ NodeOfList *create_node(const char *text, int g_id) {
 
 /* help */
 void help() {
-    printf("To display the data, enter the command \"!print\"\n"
-           "To find elements of the data, enter the command \"!find\"\n"
-           "To sort the data, enter the command \"!sort\"\n"
-           "To add new data, enter the command \"!add\"\n"
-           "To edit the data, enter the command \"!edit\"\n"
-           "To remove elements of the data, enter the command \"!delete\"\n"
-           "To save the data, enter the command \"!save\"\n"
-           "To end the program, enter the command \"!end\"\n");
+    printf("Enter the command:\n"
+           "\"!print\" = to display the data\n"
+           "\"!find\" = to find elements of the data\n"
+           "\"!sort\" = to sort the data\n"
+           "\"!add\" = to add new data\n"
+           "\"!edit\" = to edit the data\n"
+           "\"!delete\" = to remove elements of the data\n"
+           "\"!save\" = to save the data\n"
+           "\"!end\" = to end the program\n");
 }
 
 void wait() {
@@ -178,7 +179,7 @@ void print_one(NodeOfList *the_node) {
     print_line();
 }
 
-void print(const ListOfAthlete *list) {
+void print(ListOfAthlete *list) {
     print_line();
     print_head();
     print_line();
@@ -189,7 +190,7 @@ void print(const ListOfAthlete *list) {
 }
 
 /* find */
-char *m_strlwr(const char *str) {
+char *m_strlwr(char *str) {
     char *new_str = NULL;
 
     new_str = (char *) malloc((strlen(str) + 1) * sizeof(char));
@@ -200,7 +201,7 @@ char *m_strlwr(const char *str) {
     return new_str;
 }
 
-void sorted(int *mas, const ListOfAthlete *list, int param) {
+void sorted(int *mas, ListOfAthlete *list, int param) {
     NodeOfList *cur_node, *min_node;
     int ind;
 
@@ -235,6 +236,7 @@ void find(ListOfAthlete *list) {
     char x[128], *str, *new_str;
     int mas[list->length], fl, param;
 
+    CLS;
     cur_node = list->first;
     print(list);
     do {
@@ -242,16 +244,23 @@ void find(ListOfAthlete *list) {
                "1 = id\n"
                "2 = name\n"
                "3 = university\n"
+               "4 = age\n"
+               "5 = weight\n"
+               "6 = height\n"
+               "7 = result 1\n"
+               "8 = result 2\n"
+               "9 = result 3\n"
+               "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        scanf("%i", &param);
+        fgets(x, sizeof(x), stdin);
+        param = from_str_to_int(x);
         if (param < 1 || 3 < param) {
             printf("Invalid command!\n");
         }
     } while (param < 0 || 3 < param);
     if (param != 0) {
         printf("Enter the search string:\n");
-        getchar();
         fgets(x, sizeof(x), stdin);
         x[strlen(x) - 1] = '\0';
         CLS;
@@ -286,13 +295,19 @@ void find(ListOfAthlete *list) {
             do {
                 printf("Select a field to sort by or exit:\n"
                        "1 = id\n"
-                       "2 = age\n"
-                       "3 = weight\n"
-                       "4 = height\n"
-                       "5 = index\n"
+                       "2 = name\n"
+                       "3 = university\n"
+                       "4 = age\n"
+                       "5 = weight\n"
+                       "6 = height\n"
+                       "7 = result 1\n"
+                       "8 = result 2\n"
+                       "9 = result 3\n"
+                       "10 = index\n"
                        "0 = exit\n"
                        "Enter only one number!\n");
-                scanf("%i", &param);
+                fgets(x, sizeof(x), stdin);
+                param = from_str_to_int(x);
                 if (param < 0 || 5 < param) {
                     printf("Invalid command!\n");
                 } else if (param != 0) {
@@ -305,10 +320,11 @@ void find(ListOfAthlete *list) {
             } while (param != 0);
         }
     }
+    CLS;
 }
 
 /* sort */
-NodeOfList **get_mas(const ListOfAthlete *list) {
+NodeOfList **get_mas(ListOfAthlete *list) {
     NodeOfList *cur_node;
     NodeOfList **mas = NULL;
 
@@ -342,21 +358,29 @@ void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
 
 void sort(ListOfAthlete *list) {
     NodeOfList **mas;
+    char x[128];
     int n, param;
 
+    CLS;
     n = list->length;
     mas = get_mas(list);
     print(list);
     do {
         printf("Select a field to sort by or exit:\n"
                "1 = id\n"
-               "2 = age\n"
-               "3 = weight\n"
-               "4 = height\n"
-               "5 = index\n"
+               "2 = name\n"
+               "3 = university\n"
+               "4 = age\n"
+               "5 = weight\n"
+               "6 = height\n"
+               "7 = result 1\n"
+               "8 = result 2\n"
+               "9 = result 3\n"
+               "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        scanf("%i", &param);
+        fgets(x, sizeof(x), stdin);
+        param = from_str_to_int(x);
         if (param < 0 || 5 < param) {
             printf("Invalid command!\n");
         } else if (param != 0) {
@@ -375,6 +399,7 @@ void sort(ListOfAthlete *list) {
         }
     } while (param != 0);
     free(mas);
+    CLS;
 }
 
 /* add */
@@ -382,10 +407,10 @@ void add(ListOfAthlete *list, int g_id) {
     char text[1024];
     NodeOfList *cur_node;
 
+    CLS;
     print(list);
     printf("Enter data of the athlete in format:\n"
-           "name;university;age;weight;height;result1,result2,result3\n");
-    getchar();
+           "name;university;age;weight;height;result1;result2;result3\n");
     fgets(text, sizeof(text), stdin);
     cur_node = create_node(text, g_id);
     if (cur_node != NULL) {
@@ -401,18 +426,20 @@ void add(ListOfAthlete *list, int g_id) {
     }
     print(list);
     wait();
+    CLS;
 }
 
 /* edit */
 void edit(ListOfAthlete *list) {
     NodeOfList *the_node = NULL;
     int id;
-    char str[1028];
+    char str[128], x[128];
 
+    CLS;
     print(list);
     printf("Enter the ID of the Athlete you want to edit or 0 to exit:\n");
-    scanf("%i", &id);
-    getchar();
+    fgets(x, sizeof(x), stdin);
+    id = from_str_to_int(x);
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
         if (cur_node->id == id) {
             the_node = cur_node;
@@ -421,66 +448,60 @@ void edit(ListOfAthlete *list) {
     }
     if (the_node != NULL) {
         printf("\nCurrent name: %s\n"
-               "Enter new name of '-' to skip:\n", the_node->data->name);
+               "Write new name or skip (press \"Enter\"):\n", the_node->data->name);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
+            str[strcspn(str, "\n")] = '\0';
             the_node->data->name = strdup(str);
         }
 
         printf("\nCurrent university: %s\n"
-               "Enter new name of '-' to skip:\n", the_node->data->university);
+               "Write new university or skip (press \"Enter\"):\n", the_node->data->university);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
+            str[strcspn(str, "\n")] = '\0';
             the_node->data->university = strdup(str);
         }
 
         printf("\nCurrent age: %i\n"
-               "Enter new name of '-' to skip:\n", the_node->data->age);
+               "Write new age or skip (press \"Enter\"):\n", the_node->data->age);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->age = from_str_to_int(str);
         }
 
         printf("\nCurrent weight: %0.1f\n"
-               "Enter new name of '-' to skip:\n", the_node->data->weight);
+               "Write new weight or skip (press \"Enter\"):\n", the_node->data->weight);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->weight = from_str_to_float(str);
         }
 
         printf("\nCurrent height: %i\n"
-               "Enter new name of '-' to skip:\n", the_node->data->height);
+               "Write new height or skip (press \"Enter\"):\n", the_node->data->height);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->height = from_str_to_int(str);
         }
 
         printf("\nCurrent Res1: %i\n"
-               "Enter new name of '-' to skip:\n", the_node->data->result[0]);
+               "Write new Res1 or skip (press \"Enter\"):\n", the_node->data->result[0]);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->result[0] = from_str_to_int(str);
         }
 
         printf("\nCurrent Res2: %i\n"
-               "Enter new name of '-' to skip:\n", the_node->data->result[1]);
+               "Write new Res2 or skip (press \"Enter\"):\n", the_node->data->result[1]);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->result[1] = from_str_to_int(str);
         }
 
         printf("\nCurrent Res3: %i\n"
-               "Enter new name of '-' to skip:\n", the_node->data->result[2]);
+               "Write new Res3 or skip (press \"Enter\"):\n", the_node->data->result[2]);
         fgets(str, sizeof(str), stdin);
-        str[strcspn(str, "\n")] = '\0';
-        if (strcmp(str, "-") != 0) {
+        if (strcmp(str, "\n") != 0) {
             the_node->data->result[2] = from_str_to_int(str);
         }
 
@@ -491,6 +512,7 @@ void edit(ListOfAthlete *list) {
         printf("Element not found!\n");
         wait();
     }
+    CLS;
 }
 
 /* delete */
@@ -499,6 +521,7 @@ void delete(ListOfAthlete *list) {
     char x[128], *str, *new_str, ch;
     int mas[list->length], fl, param, cnt;
 
+    CLS;
     cur_node = list->first;
     print(list);
     do {
@@ -506,20 +529,27 @@ void delete(ListOfAthlete *list) {
                "1 = id\n"
                "2 = name\n"
                "3 = university\n"
+               "4 = age\n"
+               "5 = weight\n"
+               "6 = height\n"
+               "7 = result 1\n"
+               "8 = result 2\n"
+               "9 = result 3\n"
+               "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        scanf("%i", &param);
-        if (param < 1 || 3 < param) {
+        fgets(x, sizeof(x), stdin);
+        param = from_str_to_int(x);
+        if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         }
-    } while (param < 0 || 3 < param);
+    } while (param < 0 || 10 < param);
     if (param != 0) {
         printf("Enter the delete string:\n");
-        getchar();
         fgets(x, sizeof(x), stdin);
-        x[strlen(x) - 1] = '\0';
         CLS;
-        printf("%s\n", x);
+        printf("%s", x);
+        x[strcspn(x, "\n")] = '\0';
         strlwr(x);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
@@ -549,7 +579,8 @@ void delete(ListOfAthlete *list) {
             print_line();
             printf("Are you sure want to delete these athletes? (Y/N)\n");
             do {
-                scanf("%c", &ch);
+                ch = getchar();
+                getchar();
             } while (ch != 'Y' && ch != 'N');
             if (ch == 'Y') {
                 cnt = 0;
@@ -583,11 +614,11 @@ void delete(ListOfAthlete *list) {
                 }
                 list->length -= cnt;
                 print(list);
-                getchar();
                 wait();
             }
         }
     }
+    CLS;
 }
 
 /* save */
@@ -595,17 +626,19 @@ void save(ListOfAthlete *list) {
     FILE *f;
     char filename[128];
 
+    CLS;
     print(list);
     printf("Please enter the name of the file to save the data to:\n");
-    scanf("%s", filename);
+    fgets(filename, sizeof(filename), stdin);
+    filename[strcspn(filename, "\n")] = '\0';
     f = fopen(filename, "w");
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
         fprintf(f, "%s;%s;%i;%0.1f;%i;%i;%i;%i\n", cur_node->data->name, cur_node->data->university, cur_node->data->age, cur_node->data->weight, cur_node->data->height, cur_node->data->result[0], cur_node->data->result[1], cur_node->data->result[2]);
     }
     fclose(f);
     printf("The file has been successfully written!\n");
-    getchar();
     wait();
+    CLS;
 }
 
 int main() {
@@ -619,13 +652,15 @@ int main() {
     cl = 1;
     list = make_list();
     printf("Please enter the file name:\n");
-    scanf("%s", filename);
+    fgets(filename, sizeof(filename), stdin);
+    filename[strcspn(filename, "\n")] = '\0';
     f = fopen(filename, "r");
     while (f == NULL) {
         printf("Something went wrong!\n"
                "Perhaps such a file does not exist.\n"
                "Please enter the file name again:\n");
-        scanf("%s", filename);
+        fgets(filename, sizeof(filename), stdin);
+        filename[strcspn(filename, "\n")] = '\0';
         f = fopen(filename, "r");
     }
 
@@ -650,37 +685,25 @@ int main() {
     do {
         if (cl) help();
         cl = 1;
-        scanf("%s", str);
+        fgets(str, sizeof(str), stdin);
+        str[strcspn(str, "\n")] = '\0';
         if (!strcmp(str, "!print")) {
             CLS;
             print(list);
-            getchar();
             wait();
             CLS;
         } else if (!strcmp(str, "!find")) {
-            CLS;
             find(list);
-            CLS;
         } else if (!strcmp(str, "!sort")) {
-            CLS;
             sort(list);
-            CLS;
         } else if (!strcmp(str, "!add")) {
-            CLS;
             add(list, g_id++);
-            CLS;
         } else if (!strcmp(str, "!edit")) {
-            CLS;
             edit(list);
-            CLS;
         } else if (!strcmp(str, "!delete")) {
-            CLS;
             delete(list);
-            CLS;
         } else if (!strcmp(str, "!save")) {
-            CLS;
             save(list);
-            CLS;
         } else if (!strcmp(str, "!end")) {
             printf("Goodbye!\n");
         } else {
