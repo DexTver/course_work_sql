@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #ifdef WIN32
 #define CLS system("cls")
@@ -121,15 +122,12 @@ ListOfAthlete *make_list() {
     return ph;
 }
 
-NodeOfList *create_node(char *text, int g_id) {
+NodeOfList *create_node(char *str, int g_id) {
     NodeOfList *new_node = NULL;
-    char *copytext = NULL;
 
     new_node = (NodeOfList *) malloc(sizeof(NodeOfList));
-    copytext = (char *) malloc((strlen(text) + 1) * sizeof(char));
-    if (new_node && copytext) {
-        strcpy(copytext, text);
-        new_node->data = fill_struct(copytext);
+    if (new_node) {
+        new_node->data = fill_struct(strdup(str));
         new_node->next = NULL;
         new_node->prev = NULL;
         new_node->id = g_id;
@@ -190,17 +188,6 @@ void print(ListOfAthlete *list) {
 }
 
 /* find */
-char *m_strlwr(char *str) {
-    char *new_str = NULL;
-
-    new_str = (char *) malloc((strlen(str) + 1) * sizeof(char));
-    if (new_str != NULL) {
-        strcpy(new_str, str);
-        strlwr(new_str);
-    }
-    return new_str;
-}
-
 void sorted(int *mas, ListOfAthlete *list, int param) {
     NodeOfList *cur_node, *min_node;
     int ind;
@@ -212,10 +199,15 @@ void sorted(int *mas, ListOfAthlete *list, int param) {
             if (mas[i] == 1) {
                 if ((min_node == NULL) ||
                     ((param == 1 && min_node->id > cur_node->id) ||
-                     (param == 2 && min_node->data->age > cur_node->data->age) ||
-                     (param == 3 && min_node->data->weight > cur_node->data->weight) ||
-                     (param == 4 && min_node->data->height > cur_node->data->height) ||
-                     (param == 5 && min_node->data->index > cur_node->data->index))) {
+                     (param == 2 && strcasecmp(min_node->data->name, cur_node->data->name) > 0) ||
+                     (param == 3 && strcasecmp(min_node->data->university, cur_node->data->university) > 0) ||
+                     (param == 4 && min_node->data->age > cur_node->data->age) ||
+                     (param == 5 && min_node->data->weight > cur_node->data->weight) ||
+                     (param == 6 && min_node->data->height > cur_node->data->height) ||
+                     (param == 7 && min_node->data->result[0] > cur_node->data->result[0]) ||
+                     (param == 8 && min_node->data->result[1] > cur_node->data->result[1]) ||
+                     (param == 9 && min_node->data->result[2] > cur_node->data->result[2]) ||
+                     (param == 10 && min_node->data->index > cur_node->data->index))) {
                     min_node = cur_node;
                     ind = i;
                 }
@@ -233,7 +225,7 @@ void sorted(int *mas, ListOfAthlete *list, int param) {
 
 void find(ListOfAthlete *list) {
     NodeOfList *cur_node;
-    char x[128], *str, *new_str;
+    char x[128];
     int mas[list->length], fl, param;
 
     CLS;
@@ -255,10 +247,10 @@ void find(ListOfAthlete *list) {
                "Enter only one number!\n");
         fgets(x, sizeof(x), stdin);
         param = from_str_to_int(x);
-        if (param < 1 || 3 < param) {
+        if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         }
-    } while (param < 0 || 3 < param);
+    } while (param < 0 || 10 < param);
     if (param != 0) {
         printf("Enter the search string:\n");
         fgets(x, sizeof(x), stdin);
@@ -268,11 +260,16 @@ void find(ListOfAthlete *list) {
         strlwr(x);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
-            if (param == 2) str = cur_node->data->name;
-            if (param == 3) str = cur_node->data->university;
-            new_str = m_strlwr(str);
-            if ((param != 1 && strstr(new_str, x) != NULL) ||
-                (param == 1 && from_str_to_int(x) == cur_node->id)) {
+            if ((param == 1 && from_str_to_int(x) == cur_node->id) ||
+                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), x) != NULL) ||
+                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), x) != NULL) ||
+                (param == 4 && from_str_to_int(x) == cur_node->data->age) ||
+                (param == 5 && from_str_to_float(x) == cur_node->data->weight) ||
+                (param == 6 && from_str_to_int(x) == cur_node->data->height) ||
+                (param == 7 && from_str_to_int(x) == cur_node->data->result[0]) ||
+                (param == 8 && from_str_to_int(x) == cur_node->data->result[1]) ||
+                (param == 9 && from_str_to_int(x) == cur_node->data->result[2]) ||
+                (param == 10 && fabsf(from_str_to_float(x) - cur_node->data->index) < 0.001)) {
                 if (fl == 0) {
                     print_line();
                     print_head();
@@ -284,7 +281,6 @@ void find(ListOfAthlete *list) {
             } else {
                 mas[i] = 0;
             }
-            free(new_str);
             cur_node = cur_node->next;
         }
         if (fl == 0) {
@@ -308,7 +304,7 @@ void find(ListOfAthlete *list) {
                        "Enter only one number!\n");
                 fgets(x, sizeof(x), stdin);
                 param = from_str_to_int(x);
-                if (param < 0 || 5 < param) {
+                if (param < 0 || 10 < param) {
                     printf("Invalid command!\n");
                 } else if (param != 0) {
                     print_line();
@@ -381,16 +377,21 @@ void sort(ListOfAthlete *list) {
                "Enter only one number!\n");
         fgets(x, sizeof(x), stdin);
         param = from_str_to_int(x);
-        if (param < 0 || 5 < param) {
+        if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         } else if (param != 0) {
             for (int i = 0; i < n; ++i) {
                 for (int j = i; j < n; ++j) {
                     if ((param == 1 && mas[i]->id > mas[j]->id) ||
-                        (param == 2 && mas[i]->data->age > mas[j]->data->age) ||
-                        (param == 3 && mas[i]->data->weight > mas[j]->data->weight) ||
-                        (param == 4 && mas[i]->data->height > mas[j]->data->height) ||
-                        (param == 5 && mas[i]->data->index > mas[j]->data->index)) {
+                        (param == 2 && strcasecmp(mas[i]->data->name, mas[j]->data->name) > 0) ||
+                        (param == 3 && strcasecmp(mas[i]->data->university, mas[j]->data->university) > 0) ||
+                        (param == 4 && mas[i]->data->age > mas[j]->data->age) ||
+                        (param == 5 && mas[i]->data->weight > mas[j]->data->weight) ||
+                        (param == 6 && mas[i]->data->height > mas[j]->data->height) ||
+                        (param == 7 && mas[i]->data->result[0] > mas[j]->data->result[0]) ||
+                        (param == 8 && mas[i]->data->result[1] > mas[j]->data->result[1]) ||
+                        (param == 9 && mas[i]->data->result[2] > mas[j]->data->result[2]) ||
+                        (param == 10 && mas[i]->data->index > mas[j]->data->index)) {
                         my_swap(mas, list, i, j);
                     }
                 }
@@ -404,15 +405,15 @@ void sort(ListOfAthlete *list) {
 
 /* add */
 void add(ListOfAthlete *list, int g_id) {
-    char text[1024];
+    char str[1024];
     NodeOfList *cur_node;
 
     CLS;
     print(list);
     printf("Enter data of the athlete in format:\n"
            "name;university;age;weight;height;result1;result2;result3\n");
-    fgets(text, sizeof(text), stdin);
-    cur_node = create_node(text, g_id);
+    fgets(str, sizeof(str), stdin);
+    cur_node = create_node(str, g_id);
     if (cur_node != NULL) {
         cur_node->prev = list->last;
         if (list->length == 0) {
@@ -518,7 +519,7 @@ void edit(ListOfAthlete *list) {
 /* delete */
 void delete(ListOfAthlete *list) {
     NodeOfList *cur_node, *prev_node;
-    char x[128], *str, *new_str, ch;
+    char x[128], ch;
     int mas[list->length], fl, param, cnt;
 
     CLS;
@@ -553,11 +554,16 @@ void delete(ListOfAthlete *list) {
         strlwr(x);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
-            if (param == 2) str = cur_node->data->name;
-            if (param == 3) str = cur_node->data->university;
-            new_str = m_strlwr(str);
-            if ((param != 1 && strstr(new_str, x) != NULL) ||
-                (param == 1 && from_str_to_int(x) == cur_node->id)) {
+            if ((param == 1 && from_str_to_int(x) == cur_node->id) ||
+                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), x) != NULL) ||
+                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), x) != NULL) ||
+                (param == 4 && from_str_to_int(x) == cur_node->data->age) ||
+                (param == 5 && from_str_to_float(x) == cur_node->data->weight) ||
+                (param == 6 && from_str_to_int(x) == cur_node->data->height) ||
+                (param == 7 && from_str_to_int(x) == cur_node->data->result[0]) ||
+                (param == 8 && from_str_to_int(x) == cur_node->data->result[1]) ||
+                (param == 9 && from_str_to_int(x) == cur_node->data->result[2]) ||
+                (param == 10 && fabsf(from_str_to_float(x) - cur_node->data->index) < 0.001)) {
                 if (fl == 0) {
                     print_line();
                     print_head();
@@ -569,7 +575,6 @@ void delete(ListOfAthlete *list) {
             } else {
                 mas[i] = 0;
             }
-            free(new_str);
             cur_node = cur_node->next;
         }
         if (fl == 0) {
@@ -588,13 +593,13 @@ void delete(ListOfAthlete *list) {
                 for (int i = 0; i < list->length; ++i) {
                     if (mas[i] == 1) {
                         cnt++;
-                        if (cur_node->prev == NULL) {  /* первая вершина */
+                        if (cur_node->prev == NULL) {  /* first node */
                             cur_node = cur_node->next;
                             list->first = cur_node;
                             free(cur_node->prev->data);
                             free(cur_node->prev);
                             cur_node->prev = NULL;
-                        } else if (cur_node->next == NULL) { /* последняя вершина */
+                        } else if (cur_node->next == NULL) { /* last node */
                             cur_node = cur_node->prev;
                             list->last = cur_node;
                             free(cur_node->next->data);
