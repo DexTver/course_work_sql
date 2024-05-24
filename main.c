@@ -34,51 +34,51 @@ typedef struct ListOfAthlete {
 } ListOfAthlete;
 
 /* struct fill */
-int from_str_to_int(char *x) {
+int from_str_to_int(char *str) {
     int ans;
 
     ans = 0;
-    while (*x != '\0' && *x != '\n') {
-        ans = ans * 10 + (*x - '0');
-        ++x;
+    while (*str != '\0' && *str != '\n') {
+        ans = ans * 10 + (*str - '0');
+        ++str;
     }
     return ans;
 }
 
-float from_str_to_float(char *x) {
+float from_str_to_float(char *str) {
     float ans, a, b;
 
     ans = 0;
     a = 10;
     b = 1;
-    while (*x != '\0' && *x != '\n') {
-        if (*x == '.' || *x == ',') {
+    while (*str != '\0' && *str != '\n') {
+        if (*str == '.' || *str == ',') {
             a = 1;
             b = 10;
         } else {
-            ans = ans * a + (float) (*x - '0') / b;
+            ans = ans * a + (float) (*str - '0') / b;
             if (b > 1) b *= 10;
         }
-        ++x;
+        ++str;
     }
     return ans;
 }
 
-void from_str_to_int_mas(char *x, int *mas) {
+void from_str_to_int_mas(char *str, int *mas) {
     int ind, j;
 
     ind = 0;
     j = 0;
-    while (x[j] != '\0' && ind < 3) {
-        if (x[j] == ';') {
-            x[j] = '\0';
-            mas[ind++] = from_str_to_int(x);
-            x += j + 1;
+    while (str[j] != '\0' && ind < 3) {
+        if (str[j] == ';') {
+            str[j] = '\0';
+            mas[ind++] = from_str_to_int(str);
+            str += j + 1;
             j = -1;
         }
         ++j;
     }
-    if (ind < 3) mas[ind] = from_str_to_int(x);
+    if (ind < 3) mas[ind] = from_str_to_int(str);
 }
 
 Athlete *fill_struct(char *str) {
@@ -169,11 +169,11 @@ void print_node(NodeOfList *node) {
     printf("| %0.3f |\n", node->data->index);
 }
 
-void print_one(NodeOfList *the_node) {
+void print_one(NodeOfList *node) {
     print_line();
     print_head();
     print_line();
-    print_node(the_node);
+    print_node(node);
     print_line();
 }
 
@@ -225,7 +225,7 @@ void sorted(int *mas, ListOfAthlete *list, int param) {
 
 void find(ListOfAthlete *list) {
     NodeOfList *cur_node;
-    char x[128];
+    char str[128];
     int mas[list->length], fl, param;
 
     CLS;
@@ -245,31 +245,31 @@ void find(ListOfAthlete *list) {
                "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        fgets(x, sizeof(x), stdin);
-        param = from_str_to_int(x);
+        fgets(str, sizeof(str), stdin);
+        param = from_str_to_int(str);
         if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         }
     } while (param < 0 || 10 < param);
     if (param != 0) {
         printf("Enter the search string:\n");
-        fgets(x, sizeof(x), stdin);
-        x[strlen(x) - 1] = '\0';
+        fgets(str, sizeof(str), stdin);
+        str[strlen(str) - 1] = '\0';
         CLS;
-        printf("%s\n", x);
-        strlwr(x);
+        printf("%s\n", str);
+        strlwr(str);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
-            if ((param == 1 && from_str_to_int(x) == cur_node->id) ||
-                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), x) != NULL) ||
-                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), x) != NULL) ||
-                (param == 4 && from_str_to_int(x) == cur_node->data->age) ||
-                (param == 5 && from_str_to_float(x) == cur_node->data->weight) ||
-                (param == 6 && from_str_to_int(x) == cur_node->data->height) ||
-                (param == 7 && from_str_to_int(x) == cur_node->data->result[0]) ||
-                (param == 8 && from_str_to_int(x) == cur_node->data->result[1]) ||
-                (param == 9 && from_str_to_int(x) == cur_node->data->result[2]) ||
-                (param == 10 && fabsf(from_str_to_float(x) - cur_node->data->index) < 0.001)) {
+            if ((param == 1 && from_str_to_int(str) == cur_node->id) ||
+                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), str) != NULL) ||
+                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), str) != NULL) ||
+                (param == 4 && from_str_to_int(str) == cur_node->data->age) ||
+                (param == 5 && from_str_to_float(str) == cur_node->data->weight) ||
+                (param == 6 && from_str_to_int(str) == cur_node->data->height) ||
+                (param == 7 && from_str_to_int(str) == cur_node->data->result[0]) ||
+                (param == 8 && from_str_to_int(str) == cur_node->data->result[1]) ||
+                (param == 9 && from_str_to_int(str) == cur_node->data->result[2]) ||
+                (param == 10 && fabsf(from_str_to_float(str) - cur_node->data->index) < 0.001)) {
                 if (fl == 0) {
                     print_line();
                     print_head();
@@ -302,8 +302,8 @@ void find(ListOfAthlete *list) {
                        "10 = index\n"
                        "0 = exit\n"
                        "Enter only one number!\n");
-                fgets(x, sizeof(x), stdin);
-                param = from_str_to_int(x);
+                fgets(str, sizeof(str), stdin);
+                param = from_str_to_int(str);
                 if (param < 0 || 10 < param) {
                     printf("Invalid command!\n");
                 } else if (param != 0) {
@@ -354,7 +354,7 @@ void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
 
 void sort(ListOfAthlete *list) {
     NodeOfList **mas;
-    char x[128];
+    char str[128];
     int n, param;
 
     CLS;
@@ -375,8 +375,8 @@ void sort(ListOfAthlete *list) {
                "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        fgets(x, sizeof(x), stdin);
-        param = from_str_to_int(x);
+        fgets(str, sizeof(str), stdin);
+        param = from_str_to_int(str);
         if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         } else if (param != 0) {
@@ -434,13 +434,13 @@ void add(ListOfAthlete *list, int g_id) {
 void edit(ListOfAthlete *list) {
     NodeOfList *the_node = NULL;
     int id;
-    char str[128], x[128];
+    char str[128], s_id[128];
 
     CLS;
     print(list);
     printf("Enter the ID of the Athlete you want to edit or 0 to exit:\n");
-    fgets(x, sizeof(x), stdin);
-    id = from_str_to_int(x);
+    fgets(s_id, sizeof(s_id), stdin);
+    id = from_str_to_int(s_id);
     for (NodeOfList *cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
         if (cur_node->id == id) {
             the_node = cur_node;
@@ -519,7 +519,7 @@ void edit(ListOfAthlete *list) {
 /* delete */
 void delete(ListOfAthlete *list) {
     NodeOfList *cur_node, *prev_node;
-    char x[128], ch;
+    char str[128], ch;
     int mas[list->length], fl, param, cnt;
 
     CLS;
@@ -539,31 +539,31 @@ void delete(ListOfAthlete *list) {
                "10 = index\n"
                "0 = exit\n"
                "Enter only one number!\n");
-        fgets(x, sizeof(x), stdin);
-        param = from_str_to_int(x);
+        fgets(str, sizeof(str), stdin);
+        param = from_str_to_int(str);
         if (param < 0 || 10 < param) {
             printf("Invalid command!\n");
         }
     } while (param < 0 || 10 < param);
     if (param != 0) {
         printf("Enter the delete string:\n");
-        fgets(x, sizeof(x), stdin);
+        fgets(str, sizeof(str), stdin);
         CLS;
-        printf("%s", x);
-        x[strcspn(x, "\n")] = '\0';
-        strlwr(x);
+        printf("%s", str);
+        str[strcspn(str, "\n")] = '\0';
+        strlwr(str);
         fl = 0;
         for (int i = 0; cur_node != NULL && i < list->length; ++i) {
-            if ((param == 1 && from_str_to_int(x) == cur_node->id) ||
-                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), x) != NULL) ||
-                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), x) != NULL) ||
-                (param == 4 && from_str_to_int(x) == cur_node->data->age) ||
-                (param == 5 && from_str_to_float(x) == cur_node->data->weight) ||
-                (param == 6 && from_str_to_int(x) == cur_node->data->height) ||
-                (param == 7 && from_str_to_int(x) == cur_node->data->result[0]) ||
-                (param == 8 && from_str_to_int(x) == cur_node->data->result[1]) ||
-                (param == 9 && from_str_to_int(x) == cur_node->data->result[2]) ||
-                (param == 10 && fabsf(from_str_to_float(x) - cur_node->data->index) < 0.001)) {
+            if ((param == 1 && from_str_to_int(str) == cur_node->id) ||
+                (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), str) != NULL) ||
+                (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), str) != NULL) ||
+                (param == 4 && from_str_to_int(str) == cur_node->data->age) ||
+                (param == 5 && from_str_to_float(str) == cur_node->data->weight) ||
+                (param == 6 && from_str_to_int(str) == cur_node->data->height) ||
+                (param == 7 && from_str_to_int(str) == cur_node->data->result[0]) ||
+                (param == 8 && from_str_to_int(str) == cur_node->data->result[1]) ||
+                (param == 9 && from_str_to_int(str) == cur_node->data->result[2]) ||
+                (param == 10 && fabsf(from_str_to_float(str) - cur_node->data->index) < 0.001)) {
                 if (fl == 0) {
                     print_line();
                     print_head();
@@ -584,7 +584,7 @@ void delete(ListOfAthlete *list) {
             print_line();
             printf("Are you sure want to delete these athletes? (Y/N)\n");
             do {
-                ch = getchar();
+                ch = (char) getchar();
                 getchar();
             } while (ch != 'Y' && ch != 'N');
             if (ch == 'Y') {
@@ -716,5 +716,10 @@ int main() {
             cl = 0;
         }
     } while (strcmp(str, "!end") != 0);
+    for (cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
+        free(cur_node->data);
+        free(cur_node);
+    }
+    free(list);
     return 0;
 }
