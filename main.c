@@ -35,6 +35,152 @@ typedef struct ListOfAthlete {
 
 
 /* Convert a string to an integer */
+int from_str_to_int(char *str);
+
+/* Convert a string to a floating-point number */
+float from_str_to_float(char *str);
+
+/* Convert a string containing delimited integers to an integer array */
+void from_str_to_int_mas(char *str, int *mas);
+
+/* Fill an Athlete structure with data from a string */
+Athlete *fill_struct(char *str);
+
+/* Create an empty list of athletes */
+ListOfAthlete *make_list();
+
+/* Create a new node for the list */
+NodeOfList *create_node(char *str, int g_id);
+
+/* Display the list of available commands */
+void help();
+
+/* Wait for user input to continue */
+void wait();
+
+/* Print a line separator */
+void print_line();
+
+/* Print the header with column names */
+void print_head();
+
+/* Print data of a single node */
+void print_node(NodeOfList *node);
+
+/* Print data of a single node with header and footer */
+void print_one(NodeOfList *node);
+
+/* Print data of all nodes in the list */
+void print(ListOfAthlete *list);
+
+/* Sort and print nodes based on a specified parameter */
+void sorted(int *mas, ListOfAthlete *list, int param);
+
+/* Find and print nodes based on user input */
+void find(ListOfAthlete *list);
+
+/* Creates an array of pointers to NodeOfList structures based on the given list */
+NodeOfList **get_mas(ListOfAthlete *list);
+
+/* Swaps two nodes in the list and updates their positions */
+void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j);
+
+/* Sorts the list of athletes based on a selected parameter */
+void sort(ListOfAthlete *list);
+
+/* Adds a new athlete to the list */
+void add(ListOfAthlete *list, int g_id);
+
+/* Allows editing the details of an athlete in the list based on the provided ID */
+void edit(ListOfAthlete *list);
+
+/* Deleting athletes from the list based on the specified parameter */
+void delete(ListOfAthlete *list);
+
+/* Save the data of athletes stored in a linked list to a file specified by the user */
+void save(ListOfAthlete *list);
+
+int main() {
+    ListOfAthlete *list; /* Pointer to the list of athletes */
+    int g_id, cl; /* Variables for athlete ID and command line flag */
+    char filename[128], str[128], text[1024]; /* Buffers for filename, user input, and file content */
+    NodeOfList *cur_node = NULL; /* Pointer to the current node in the list */
+    FILE *f; /* File pointer */
+
+    g_id = 1; /* Initialize athlete ID */
+    cl = 1; /* Initialize command line input flag */
+    list = make_list(); /* Create an empty list of athletes */
+    printf("Please enter the file name:\n");
+    fgets(filename, sizeof(filename), stdin); /* Read the filename from the user */
+    filename[strcspn(filename, "\n")] = '\0'; /* Remove the newline character from the input */
+    f = fopen(filename, "r"); /* Open the file for reading */
+    while (f == NULL) { /* Loop until a valid file is opened */
+        printf("Something went wrong!\n"
+               "Perhaps such a file does not exist.\n"
+               "Please enter the file name again:\n");
+        fgets(filename, sizeof(filename), stdin); /* Read the filename again if opening fails */
+        filename[strcspn(filename, "\n")] = '\0'; /* Remove the newline character from the input */
+        f = fopen(filename, "r"); /* Attempt to open the file again */
+    }
+
+    while (fgets(text, sizeof(text), f)) { /* Read each line from the file */
+        cur_node = create_node(text, g_id++); /* Create a new node with the text and assign a unique ID */
+        if (cur_node != NULL) {
+            cur_node->prev = list->last; /* Set the previous node pointer */
+            if (list->length == 0) {
+                list->first = cur_node; /* Set the first node if the list is empty */
+            } else {
+                list->last->next = cur_node; /* Link the new node to the end of the list */
+            }
+            list->last = cur_node; /* Update the last node pointer */
+            ++list->length; /* Increment the list length */
+        }
+    }
+
+    CLS; /* Clear the screen */
+    printf("The file has been successfully processed!\n");
+    fclose(f); /* Close the file */
+
+    do {
+        if (cl) help(); /* Display help information if the flag is set */
+        cl = 1; /* Reset the flag */
+        fgets(str, sizeof(str), stdin); /* Read a command from the user */
+        str[strcspn(str, "\n")] = '\0'; /* Remove the newline character from the input */
+        if (!strcmp(str, "!print")) { /* Compare the command with "!print" */
+            CLS;
+            print(list); /* Print the list of athletes */
+            wait();
+            CLS;
+        } else if (!strcmp(str, "!find")) { /* Compare the command with "!find" */
+            find(list); /* Find an athlete in the list */
+        } else if (!strcmp(str, "!sort")) { /* Compare the command with "!sort" */
+            sort(list); /* Sort the list of athletes */
+        } else if (!strcmp(str, "!add")) { /* Compare the command with "!add" */
+            add(list, g_id++); /* Add a new athlete to the list */
+        } else if (!strcmp(str, "!edit")) { /* Compare the command with "!edit" */
+            edit(list); /* Edit an existing athlete in the list */
+        } else if (!strcmp(str, "!delete")) { /* Compare the command with "!delete" */
+            delete(list); /* Delete an athlete from the list */
+        } else if (!strcmp(str, "!save")) { /* Compare the command with "!save" */
+            save(list); /* Save the list to a file */
+        } else if (!strcmp(str, "!end")) { /* Compare the command with "!end" */
+            printf("Goodbye!\n"); /* Print goodbye message */
+        } else {
+            printf("Unknown command!\n"); /* Handle unknown commands */
+            cl = 0; /* Reset the flag to not display help next time */
+        }
+    } while (strcmp(str, "!end") != 0); /* Continue until the user enters "!end" */
+
+    /* Free the allocated memory */
+    for (cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
+        free(cur_node->data);
+        free(cur_node);
+    }
+    free(list);
+    return 0;
+}
+
+/* Convert a string to an integer */
 int from_str_to_int(char *str) {
     int ans; /* Variable to store the resulting integer */
 
@@ -662,84 +808,4 @@ void save(ListOfAthlete *list) {
     printf("The file has been successfully written!\n");  /* Inform the user that the file has been written successfully */
     wait();
     CLS;  /* Clear the screen */
-}
-
-int main() {
-    ListOfAthlete *list; /* Pointer to the list of athletes */
-    int g_id, cl; /* Variables for athlete ID and command line flag */
-    char filename[128], str[128], text[1024]; /* Buffers for filename, user input, and file content */
-    NodeOfList *cur_node = NULL; /* Pointer to the current node in the list */
-    FILE *f; /* File pointer */
-
-    g_id = 1; /* Initialize athlete ID */
-    cl = 1; /* Initialize command line input flag */
-    list = make_list(); /* Create an empty list of athletes */
-    printf("Please enter the file name:\n");
-    fgets(filename, sizeof(filename), stdin); /* Read the filename from the user */
-    filename[strcspn(filename, "\n")] = '\0'; /* Remove the newline character from the input */
-    f = fopen(filename, "r"); /* Open the file for reading */
-    while (f == NULL) { /* Loop until a valid file is opened */
-        printf("Something went wrong!\n"
-               "Perhaps such a file does not exist.\n"
-               "Please enter the file name again:\n");
-        fgets(filename, sizeof(filename), stdin); /* Read the filename again if opening fails */
-        filename[strcspn(filename, "\n")] = '\0'; /* Remove the newline character from the input */
-        f = fopen(filename, "r"); /* Attempt to open the file again */
-    }
-
-    while (fgets(text, sizeof(text), f)) { /* Read each line from the file */
-        cur_node = create_node(text, g_id++); /* Create a new node with the text and assign a unique ID */
-        if (cur_node != NULL) {
-            cur_node->prev = list->last; /* Set the previous node pointer */
-            if (list->length == 0) {
-                list->first = cur_node; /* Set the first node if the list is empty */
-            } else {
-                list->last->next = cur_node; /* Link the new node to the end of the list */
-            }
-            list->last = cur_node; /* Update the last node pointer */
-            ++list->length; /* Increment the list length */
-        }
-    }
-
-    CLS; /* Clear the screen */
-    printf("The file has been successfully processed!\n");
-    fclose(f); /* Close the file */
-
-    do {
-        if (cl) help(); /* Display help information if the flag is set */
-        cl = 1; /* Reset the flag */
-        fgets(str, sizeof(str), stdin); /* Read a command from the user */
-        str[strcspn(str, "\n")] = '\0'; /* Remove the newline character from the input */
-        if (!strcmp(str, "!print")) { /* Compare the command with "!print" */
-            CLS;
-            print(list); /* Print the list of athletes */
-            wait();
-            CLS;
-        } else if (!strcmp(str, "!find")) { /* Compare the command with "!find" */
-            find(list); /* Find an athlete in the list */
-        } else if (!strcmp(str, "!sort")) { /* Compare the command with "!sort" */
-            sort(list); /* Sort the list of athletes */
-        } else if (!strcmp(str, "!add")) { /* Compare the command with "!add" */
-            add(list, g_id++); /* Add a new athlete to the list */
-        } else if (!strcmp(str, "!edit")) { /* Compare the command with "!edit" */
-            edit(list); /* Edit an existing athlete in the list */
-        } else if (!strcmp(str, "!delete")) { /* Compare the command with "!delete" */
-            delete(list); /* Delete an athlete from the list */
-        } else if (!strcmp(str, "!save")) { /* Compare the command with "!save" */
-            save(list); /* Save the list to a file */
-        } else if (!strcmp(str, "!end")) { /* Compare the command with "!end" */
-            printf("Goodbye!\n"); /* Print goodbye message */
-        } else {
-            printf("Unknown command!\n"); /* Handle unknown commands */
-            cl = 0; /* Reset the flag to not display help next time */
-        }
-    } while (strcmp(str, "!end") != 0); /* Continue until the user enters "!end" */
-
-    /* Free the allocated memory */
-    for (cur_node = list->first; cur_node != NULL; cur_node = cur_node->next) {
-        free(cur_node->data);
-        free(cur_node);
-    }
-    free(list);
-    return 0;
 }
