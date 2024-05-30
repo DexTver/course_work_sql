@@ -496,16 +496,31 @@ NodeOfList **get_mas(ListOfAthlete *list) {
 void my_swap(NodeOfList **mas, ListOfAthlete *list, int i, int j) {
     NodeOfList *q;
 
-    if (i == 0) {
-        list->first = mas[j]; /* Set the first node to the new first node */
-    } else {
-        mas[i - 1]->next = mas[j]; /* Update the next pointer of the previous node */
+    if (mas[i] == list->first) { /* Update the list's first pointer and set the previous pointer of mas[j] to NULL */
+        list->first = mas[j];
+        mas[j]->prev = NULL;
+    } else { /* Update the next pointer of the previous node and set the previous pointer of mas[j] */
+        mas[i - 1]->next = mas[j];
+        mas[j]->prev = mas[i - 1];
     }
-    mas[j - 1]->next = mas[i]; /* Link the swapped node to the next node */
-    q = mas[j]->next; /* Swap the next pointers of the nodes */
-    mas[j]->next = mas[i]->next;
-    mas[i]->next = q;
-    q = mas[i]; /* Swap the pointers in the array */
+    if (mas[j] == list->last) { /* Update the list's last pointer and set the next pointer of mas[i] to NULL */
+        list->last = mas[i];
+        mas[i]->next = NULL;
+    } else { /* Update the previous pointer of the next node and set the next pointer of mas[i] */
+        mas[j + 1]->prev = mas[i];
+        mas[i]->next = mas[j + 1];
+    }
+    if (j - i == 1) { /* If j and i are adjacent, swap their next and previous pointers */
+        mas[i]->prev = mas[j];
+        mas[j]->next = mas[i];
+    } else { /* Update the next and previous pointers of the nodes surrounding mas[i] and mas[j] */
+        mas[j - 1]->next = mas[i];
+        mas[i]->prev = mas[j - 1];
+        mas[i + 1]->prev = mas[j];
+        mas[j]->next = mas[i + 1];
+    }
+    /* Swap the positions of mas[i] and mas[j] in the array */
+    q = mas[i];
     mas[i] = mas[j];
     mas[j] = q;
 }
@@ -540,7 +555,7 @@ void sort(ListOfAthlete *list) {
             printf("Invalid command!\n");
         } else if (param != 0) {
             for (int i = 0; i < n; ++i) {
-                for (int j = i; j < n; ++j) {
+                for (int j = i + 1; j < n; ++j) {
                     if ((param == 1 && mas[i]->id > mas[j]->id) || /* Check if nodes should be swapped based on the selected parameter */
                         (param == 2 && strcasecmp(mas[i]->data->name, mas[j]->data->name) > 0) ||
                         (param == 3 && strcasecmp(mas[i]->data->university, mas[j]->data->university) > 0) ||
