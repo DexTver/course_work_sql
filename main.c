@@ -124,7 +124,7 @@ int main() {
     }
 
     while (fgets(text, sizeof(text), f)) { /* Read each line from the file */
-        cur_node = create_node(text, g_id++); /* Create a new node with the text and assign a unique ID */
+        cur_node = create_node(text, g_id); /* Create a new node with the text and assign a unique ID */
         if (cur_node != NULL) {
             cur_node->prev = list->last; /* Set the previous node pointer */
             if (list->length == 0) {
@@ -134,6 +134,7 @@ int main() {
             }
             list->last = cur_node; /* Update the last node pointer */
             ++list->length; /* Increment the list length */
+            ++g_id;
         }
     }
 
@@ -182,19 +183,25 @@ int main() {
 
 /* Convert a string to an integer */
 int from_str_to_int(char *str) {
-    int ans; /* Variable to store the resulting integer */
+    int ans, x; /* Variable to store the resulting integer */
 
     ans = 0; /* Initialize the answer to 0 */
     while (*str != '\0' && *str != '\n') { /* Loop until the end of the string */
-        ans = ans * 10 + (*str - '0'); /* Convert character to integer and add to the result */
-        ++str; /* Move to the next character in the string */
+        x = *str - '0';
+        if (0 > x || x > 9) {
+            ans = 0;
+            *str = '\0';
+        } else {
+            ans = ans * 10 + x; /* Convert character to integer and add to the result */
+            ++str; /* Move to the next character in the string */
+        }
     }
     return ans;
 }
 
 /* Convert a string to a floating-point number */
 float from_str_to_float(char *str) {
-    float ans, a, b; /* Variables to store the resulting float and decimal places */
+    float ans, a, b, x; /* Variables to store the resulting float and decimal places */
 
     ans = 0; /* Initialize the answer to 0 */
     a = 10; /* Initialize the factor for integer part */
@@ -203,11 +210,18 @@ float from_str_to_float(char *str) {
         if (*str == '.' || *str == ',') { /* Check for decimal separator */
             a = 1; /* Reset the factor for integer part */
             b = 10; /* Set the factor for decimal part */
+            ++str; /* Move to the next character in the string */
         } else {
-            ans = ans * a + (float) (*str - '0') / b; /* Convert character to float and add to the result */
-            if (b > 1) b *= 10; /* Update the decimal factor */
+            x = (float) (*str - '0');
+            if (0 > x || x > 9) {
+                ans = 0;
+                *str = '\0';
+            } else {
+                ans = ans * a + x / b; /* Convert character to float and add to the result */
+                if (b > 1) b *= 10; /* Update the decimal factor */
+                ++str; /* Move to the next character in the string */
+            }
         }
-        ++str; /* Move to the next character in the string */
     }
     return ans;
 }
@@ -247,14 +261,21 @@ Athlete *fill_struct(char *str) {
                 word = str + tt + 1; /* Move to the next substring */
             }
         }
-        str[tt] = '\0'; /* Replace the last delimiter with null terminator */
-        user->name = pole[0]; /* Assign the name to the Athlete structure */
-        user->university = pole[1]; /* Assign the university to the Athlete structure */
-        user->age = from_str_to_int(pole[2]); /* Convert and assign the age to the Athlete structure */
-        user->weight = from_str_to_float(pole[3]); /* Convert and assign the weight to the Athlete structure */
-        user->height = from_str_to_int(pole[4]); /* Convert and assign the height to the Athlete structure */
-        from_str_to_int_mas(word, user->result); /* Convert and assign the result to the Athlete structure */
-        user->index = (float) (user->result[0] + user->result[1] + user->result[2]) / user->weight; /* Calculate and assign the index to the Athlete structure */
+        if (ind == 5) {
+            str[tt] = '\0'; /* Replace the last delimiter with null terminator */
+            user->name = pole[0]; /* Assign the name to the Athlete structure */
+            user->university = pole[1]; /* Assign the university to the Athlete structure */
+            user->age = from_str_to_int(pole[2]); /* Convert and assign the age to the Athlete structure */
+            user->weight = from_str_to_float(pole[3]); /* Convert and assign the weight to the Athlete structure */
+            user->height = from_str_to_int(pole[4]); /* Convert and assign the height to the Athlete structure */
+            user->result[0] = 0;
+            user->result[1] = 0;
+            user->result[2] = 0;
+            from_str_to_int_mas(word, user->result); /* Convert and assign the result to the Athlete structure */
+            user->index = (float) (user->result[0] + user->result[1] + user->result[2]) / user->weight; /* Calculate and assign the index to the Athlete structure */
+        } else {
+            user = NULL;
+        }
     }
     return user;
 }
@@ -282,6 +303,10 @@ NodeOfList *create_node(char *str, int g_id) {
         new_node->next = NULL; /* Initialize the pointer to the next node to NULL */
         new_node->prev = NULL; /* Initialize the pointer to the previous node to NULL */
         new_node->id = g_id; /* Assign the unique identifier to the node */
+    }
+    if (new_node->data == NULL) {
+        free(new_node);
+        new_node = NULL;
     }
     return new_node;
 }
@@ -319,6 +344,7 @@ void print_head() {
 void print_node(NodeOfList *node) {
     printf("| %-2i | %-20s | %-10s | %-3i | %0.1f  ", node->id, node->data->name, node->data->university, node->data->age, node->data->weight);
     if (node->data->weight < 100) printf(" ");
+    if (node->data->weight < 10) printf(" ");
     printf("| %-6i | %-4i | %-4i | %-4i | %0.3f |\n", node->data->height, node->data->result[0], node->data->result[1], node->data->result[2], node->data->index);
 }
 
@@ -415,7 +441,7 @@ void find(ListOfAthlete *list) {
         printf("%s\n", str); /* Print the search string */
         strlwr(str); /* Convert search string to lowercase */
         fl = 0; /* Initialize flag */
-        for (int i = 0; cur_node != NULL && i < list->length; ++i) { /* Iterate through the list */
+        for (int i = 0; cur_node != NULL && i < list->length; ++i, cur_node = cur_node->next) { /* Iterate through the list */
             if ((param == 1 && from_str_to_int(str) == cur_node->id) || /* Check for match based on parameter */
                 (param == 2 && strstr(strlwr(strdup(cur_node->data->name)), str) != NULL) ||
                 (param == 3 && strstr(strlwr(strdup(cur_node->data->university)), str) != NULL) ||
@@ -437,7 +463,6 @@ void find(ListOfAthlete *list) {
             } else {
                 mas[i] = 0; /* Mark node as not found */
             }
-            cur_node = cur_node->next; /* Move to the next node */
         }
         if (fl == 0) { /* If no matches are found */
             printf("No matches found!\n"); /* Print message */
@@ -598,6 +623,7 @@ void add(ListOfAthlete *list, int g_id) {
         }
         list->last = cur_node; /* Update the last pointer to the new node */
         ++list->length; /* Increment the length of the list */
+        ++g_id;
         printf("The item has been successfully inserted!\n"); /* Inform the user about the successful insertion */
     }
     print(list); /* Print the updated list */
