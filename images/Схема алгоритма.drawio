@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" modified="2024-05-30T12:30:09.843Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="DtTnLq8JhY2ZOEZ_zM7a" version="24.4.10" type="github" pages="11">
+<mxfile host="app.diagrams.net" modified="2024-05-30T12:33:04.264Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36" etag="zOOZc_PRHpLYnUw960U6" version="24.4.10" type="github" pages="11">
   <diagram id="ofa8BuuTmH4S-BvxZ5u1" name="main+from(2)">
-    <mxGraphModel dx="909" dy="1015" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+    <mxGraphModel dx="366" dy="698" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -4059,7 +4059,7 @@
       </root>
     </mxGraphModel>
   </diagram>
-  <diagram id="GsVmoBSd6hs8DqiRscKI" name="B02">
+  <diagram id="GsVmoBSd6hs8DqiRscKI" name="D02">
     <mxGraphModel dx="1735" dy="1015" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
@@ -4073,7 +4073,7 @@
             <mxPoint x="170" y="300" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="m2i-UxmZWyObLCuv22Y0-3" value="&lt;div&gt;B02&lt;/div&gt;Начало" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
+        <mxCell id="m2i-UxmZWyObLCuv22Y0-3" value="&lt;div&gt;D02&lt;/div&gt;Начало" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.terminator;whiteSpace=wrap;" vertex="1" parent="1">
           <mxGeometry x="40" y="40" width="120" height="40" as="geometry" />
         </mxCell>
         <mxCell id="m2i-UxmZWyObLCuv22Y0-4" value="Ввод ch" style="shape=parallelogram;perimeter=parallelogramPerimeter;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
