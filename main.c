@@ -710,11 +710,10 @@ void edit(ListOfAthlete *list) {
 
         the_node->data->index = (float) (the_node->data->result[0] + the_node->data->result[1] + the_node->data->result[2]) / the_node->data->weight;
         print_one(the_node); /* Print the updated details of the athlete */
-        wait();
     } else if (id != 0) {
         printf("Element not found!\n"); /* Notify the user if the ID is not found */
-        wait();
     }
+    wait();
     CLS; /* Clear the screen */
 }
 
